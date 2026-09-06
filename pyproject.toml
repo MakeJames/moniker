@@ -14,7 +14,8 @@ dependencies = [
 ]
 
 [project.scripts]
-moniker = "moniker:main"
+moniker = "moniker.app:app"
+moniker-migrate = "moniker.migrate:main"
 
 [project.dev-scripts]
 ruff = {cmd = "ruff check ./src/ ./tests/"}
