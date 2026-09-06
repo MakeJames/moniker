@@ -1,4 +1,4 @@
-"""Model definitions for the Moniker pacakge."""
+"""Response definitions for the Moniker package."""
 
 from datetime import datetime
 from typing import Any, Generic, override, Self, TypeVar
@@ -61,7 +61,7 @@ class ApplicationRoot(Document):
 class NameResource(Document):
     """A name item from the database."""
 
-    source: str | None = None
+    sources: tuple[Link, ...] = ()
     tags: tuple[str, ...] = ()
     in_use: bool = False
 
@@ -72,6 +72,35 @@ class NameResource(Document):
             self.links = (
                 Link.self_link(f"/names/{self.title}", title=self.title),
             )
+
+
+class SourceResource(Document):
+    """The source material for a catelogue item."""
+
+    type: str
+    items: int = Field(ge=0)
+    names: tuple[NameResource, ...] = ()
+
+    @override
+    def model_post_init(self, __context: Any) -> None:
+        """Dynamically add the links to each name."""
+        if not self.links:
+            self.links = (
+                Link.self_link(f"/sources/{self.title}", title=self.title),
+            )
+
+
+class SourceCollection(Document):
+    """A Collection of Sources."""
+
+    count: int = Field(ge=0)
+    items: tuple[Link, ...] = ()
+
+    @override
+    def model_post_init(self, __context: Any) -> None:
+        """Dynamically add the links to each name."""
+        if not self.links:
+            self.links = (Link.self_link("/sources", title=self.title),)
 
 
 class NameCollection(Collection[NameResource]):

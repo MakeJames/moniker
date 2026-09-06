@@ -6,7 +6,7 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict
 
 
-class AllocationState(StrEnum):
+class NameState(StrEnum):
     """Track the availability of a catalogue entry.
 
     A catalogue item can be assigned to a device or service.
@@ -18,7 +18,7 @@ class AllocationState(StrEnum):
     RESERVED = "reserved"
 
 
-class AllocationEventType(StrEnum):
+class NameEventType(StrEnum):
     """Track the action or event on a given catalogue entry."""
 
     CREATED = "created"
@@ -56,7 +56,7 @@ class Source(BaseModel):
 class Name(BaseModel):
     """The Name object in Moniker's catalogue.
 
-    A name represents a condidate indentifier that may be suggested
+    A name represents a candidate identifier that may be suggested
     and allocated to a device or service.
 
     Names are persistent catalogue entries,
@@ -103,8 +103,47 @@ class Name(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     value: str
-    source: tuple[Source, ...] = ()
+    sources: tuple[Source, ...] = ()
     description: str | None = None
     tags: tuple[str, ...] = ()
     enabled: bool = True
-    state: AllocationState = AllocationState.AVAILABLE
+    state: NameState = NameState.AVAILABLE
+
+
+class NameEvent(BaseModel):
+    """An entry in the allocation history for a given name.
+
+    Throughout its lifecycle,
+    a name can be assigned, reserved, made available.
+    Historical records enhance the meaning
+    and context of a given catalogue item.
+
+    These records are available in an append only table.
+    To recall the current availability of a name,
+    the latest event should be interpreted as the current state.
+
+    Attributes:
+        name:
+            The name affected by the event.
+
+        assigned_to:
+            A reference to the device or service that is attached to the name.
+
+        event:
+            The change that was applied to the given name.
+
+        state:
+            The current availability of the name.
+
+        occured_at:
+            The timestamp of the activity.
+
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    name: str
+    assigend_to: str | None = None
+    event: NameEventType
+    state: NameState
+    occured_at: datetime
