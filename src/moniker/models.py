@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
+
 class Link(BaseModel):
     """Base model for links within the json response.
 
@@ -51,6 +52,12 @@ class Collection(Document, Generic[T]):
     ...
 
 
+class ApplicationRoot(Document):
+    """The root document of the applicaiton."""
+
+    version: str
+
+
 class Name(Document):
     """A name item from the database."""
 
@@ -63,10 +70,7 @@ class Name(Document):
         """Dynamically add the links to each name."""
         if not self.links:
             self.links = (
-                Link.self_link(
-                    f"/names/{self.title}",
-                    title=self.title
-                ),
+                Link.self_link(f"/names/{self.title}", title=self.title),
             )
 
 
@@ -86,10 +90,7 @@ class Tag(Document):
         """Dynamically add the links to each tag."""
         if not self.links:
             self.links = (
-                Link.self_link(
-                    f"/tags/{self.title}",
-                    title=self.title
-                ),
+                Link.self_link(f"/tags/{self.title}", title=self.title),
             )
 
 
@@ -134,11 +135,6 @@ class Suggestion(Document):
     def model_post_init(self, __context: Any) -> None:
         """Dynamically add the links to each name."""
         if self.query:
-            self.links = (
-                Link.self_link(f"/names/suggest?{self.query}"),
-            )
+            self.links = (Link.self_link(f"/names/suggest?{self.query}"),)
         else:
-            self.links = (
-                Link.self_link("/names/suggest"),
-            )
-
+            self.links = (Link.self_link("/names/suggest"),)
