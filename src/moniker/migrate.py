@@ -14,6 +14,11 @@ MIGRATION_PATTERN = re.compile(
     r"^(?P<version>\d{4})_(?P<name>[a-z0-9_]+)\.sql$"
 )
 
+class UnrecognisedMigrationFileError(Exception):
+    """Error when file names do not match the migration pattern."""
+
+    ...
+
 
 @dataclass(frozen=True)
 class Migration:
@@ -44,7 +49,10 @@ def discover_migrations(
         match = MIGRATION_PATTERN.match(migration_path.name)
 
         if match is None:
-            continue
+            raise UnrecognisedMigrationFileError(
+                f"File name {migration_path} is not recognised. "
+                "Ensure that the file name is correctly formatted."
+            )
 
         migrations.append(
             Migration(

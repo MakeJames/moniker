@@ -1,11 +1,7 @@
-/* Source table */
-/* Updated name table with sources */
-/* Updated allocation table to be append only. */
-/* Checks and constraints */
+PRAGMA foreign_keys = OFF;
 
 BEGIN IMMEDIATE;
 
-PRAGMA foreign_keys = OFF;
 
 /* New Names Table */
 
@@ -30,9 +26,9 @@ FROM names;
 /* New Sources Tables */
 
 CREATE TABLE sources (
-    title TEXT,
+    title TEXT NOT NULL,
     description TEXT,
-    type TEXT,
+    type TEXT NOT NULL,
 
     PRIMARY KEY (
         title,
@@ -49,7 +45,7 @@ CREATE TABLE name_sources (
         name,
         source_title,
         source_type
-    )
+    ),
 
     FOREIGN KEY (name)
         REFERENCES names_new(name)
@@ -192,7 +188,8 @@ DROP TABLE names;
 ALTER TABLE names_new
 RENAME TO names;
 
-PRAGMA foreign_keys = ON;
 PRAGMA user_version = 3;
 
 COMMIT;
+
+PRAGMA foreign_keys = ON;

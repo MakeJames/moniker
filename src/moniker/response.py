@@ -5,6 +5,8 @@ from typing import Any, Generic, override, Self, TypeVar
 
 from pydantic import BaseModel, Field
 
+from moniker.domain import NameEventType, NameState
+
 T = TypeVar("T")
 
 
@@ -49,7 +51,6 @@ class Collection(Document, Generic[T]):
 
     count: int = Field(ge=0)
     items: tuple[T, ...] = ()
-    ...
 
 
 class ApplicationRoot(Document):
@@ -63,7 +64,7 @@ class NameResource(Document):
 
     sources: tuple[Link, ...] = ()
     tags: tuple[str, ...] = ()
-    in_use: bool = False
+    state: NameState = NameState.AVAILABLE
 
     @override
     def model_post_init(self, __context: Any) -> None:
@@ -71,6 +72,11 @@ class NameResource(Document):
         if not self.links:
             self.links = (
                 Link.self_link(f"/names/{self.title}", title=self.title),
+                Link(
+                    href=f"/names/{self.title}/history",
+                    title=f"{self.title} history",
+                    rel="history",
+                )
             )
 
 
@@ -86,7 +92,8 @@ class SourceResource(Document):
         """Dynamically add the links to each name."""
         if not self.links:
             self.links = (
-                Link.self_link(f"/sources/{self.title}", title=self.title),
+                Link.self_link(f"/sources/{self.type}/{self.title}",
+                               title=self.title),
             )
 
 
@@ -102,6 +109,17 @@ class SourceCollection(Document):
         if not self.links:
             self.links = (Link.self_link("/sources", title=self.title),)
 
+class SourceTypeCollection(Collection[SourceResource]):
+    """A collection of sources by type."""
+
+    @override
+    def model_post_init(self, __context: Any) -> None:
+        """Dynamically add the links to each name."""
+        if not self.links:
+            self.links = (
+                Link.self_link(f"/sources/{self.title}",
+                               title=self.title),
+            )
 
 class NameCollection(Collection[NameResource]):
     """A collection of Names."""
@@ -129,12 +147,44 @@ class TagCollection(Collection[TagResource]):
     pass
 
 
-class AllocationResource(Document):
+class NameEventResource(Document):
     """The record of a name given to a specific device or application."""
+
+    event: NameEventType
+    assigned_to: str | None = None
+    occurred_at: datetime
+
+    @override
+    def model_post_init(self, __context: Any) -> None:
+        """Dynamically add the links to each allocation."""
+        if not self.links:
+            self.links = (
+                Link.self_link(
+                    f"/names/{self.title}/history/{self.occurred_at}",
+                    title=self.title,
+                ),
+            )
+
+class NameEventCoolection(Collection[NameEventResource]):
+    """A collection of recors associated with a device"""
+
+    @override
+    def model_post_init(self, __context: Any) -> None:
+        """Dynamically add the links to each allocation."""
+        if not self.links:
+            self.links = (
+                Link.self_link(
+                    f"/names/{self.title}/history",
+                    title=self.title,
+                ),
+            )
+
+
+class AllocationResource(Document):
+    """The current assignment of a name given to a device or application."""
 
     assigned_to: str
     assigned_at: datetime
-    released_at: datetime | None = None
 
     @override
     def model_post_init(self, __context: Any) -> None:

@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "makejames", email = "james@makejames.com" }
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.141.1",
     "pydantic>=2.13.5",
@@ -14,7 +14,6 @@ dependencies = [
 ]
 
 [project.scripts]
-moniker = "moniker.app:app"
 moniker-migrate = "moniker.migrate:main"
 
 [project.dev-scripts]

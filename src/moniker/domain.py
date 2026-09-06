@@ -19,7 +19,16 @@ class NameState(StrEnum):
 
 
 class NameEventType(StrEnum):
-    """Track the action or event on a given catalogue entry."""
+    """Track the action or event on a given catalogue entry.
+
+    The lifecycle of a catalogue item might look like
+        CREATED   [available]
+        RESERVED  [reserved]
+        RELEASED  [available]
+        ALLOCATED [allocated]
+        RELEASED  [available]
+
+    """
 
     CREATED = "created"
     ALLOCATED = "allocated"
@@ -50,7 +59,7 @@ class Source(BaseModel):
 
     title: str
     description: str | None = None
-    type: str | None = None
+    type: str | None
 
 
 class Name(BaseModel):
@@ -135,7 +144,7 @@ class NameEvent(BaseModel):
         state:
             The current availability of the name.
 
-        occured_at:
+        occurred_at:
             The timestamp of the activity.
 
     """
@@ -143,7 +152,7 @@ class NameEvent(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     name: str
-    assigend_to: str | None = None
+    assigned_to: str | None = None
     event: NameEventType
     state: NameState
-    occured_at: datetime
+    occurred_at: datetime
