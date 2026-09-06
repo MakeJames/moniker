@@ -1,0 +1,1 @@
+"""Instantiate the Moniker package."""
