@@ -76,7 +76,7 @@ class NameResource(Document):
                     href=f"/names/{self.title}/history",
                     title=f"{self.title} history",
                     rel="history",
-                )
+                ),
             )
 
 
@@ -92,8 +92,9 @@ class SourceResource(Document):
         """Dynamically add the links to each name."""
         if not self.links:
             self.links = (
-                Link.self_link(f"/sources/{self.type}/{self.title}",
-                               title=self.title),
+                Link.self_link(
+                    f"/sources/{self.type}/{self.title}", title=self.title
+                ),
             )
 
 
@@ -109,6 +110,7 @@ class SourceCollection(Document):
         if not self.links:
             self.links = (Link.self_link("/sources", title=self.title),)
 
+
 class SourceTypeCollection(Collection[SourceResource]):
     """A collection of sources by type."""
 
@@ -117,9 +119,9 @@ class SourceTypeCollection(Collection[SourceResource]):
         """Dynamically add the links to each name."""
         if not self.links:
             self.links = (
-                Link.self_link(f"/sources/{self.title}",
-                               title=self.title),
+                Link.self_link(f"/sources/{self.title}", title=self.title),
             )
+
 
 class NameCollection(Collection[NameResource]):
     """A collection of Names."""
@@ -165,8 +167,9 @@ class NameEventResource(Document):
                 ),
             )
 
-class NameEventCoolection(Collection[NameEventResource]):
-    """A collection of recors associated with a device"""
+
+class NameEventCollection(Collection[NameEventResource]):
+    """A collection of records associated with a device."""
 
     @override
     def model_post_init(self, __context: Any) -> None:

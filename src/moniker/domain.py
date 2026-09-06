@@ -2,8 +2,17 @@
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StringConstraints
+
+NonEmptyString = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+    ),
+]
 
 
 class NameState(StrEnum):
@@ -57,9 +66,9 @@ class Source(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    title: str
+    title: NonEmptyString
     description: str | None = None
-    type: str | None
+    type: NonEmptyString
 
 
 class Name(BaseModel):

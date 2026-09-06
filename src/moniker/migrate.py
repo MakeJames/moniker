@@ -14,6 +14,7 @@ MIGRATION_PATTERN = re.compile(
     r"^(?P<version>\d{4})_(?P<name>[a-z0-9_]+)\.sql$"
 )
 
+
 class UnrecognisedMigrationFileError(Exception):
     """Error when file names do not match the migration pattern."""
 
