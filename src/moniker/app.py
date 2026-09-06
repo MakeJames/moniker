@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 
-from moniker.models import ApplicationRoot, Link
+from moniker.response import ApplicationRoot, Link
 
 
 app = FastAPI(title="Moniker", description="A small API for naming things.")

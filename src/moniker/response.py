@@ -58,7 +58,7 @@ class ApplicationRoot(Document):
     version: str
 
 
-class Name(Document):
+class NameResource(Document):
     """A name item from the database."""
 
     source: str | None = None
@@ -74,13 +74,13 @@ class Name(Document):
             )
 
 
-class Names(Collection[Name]):
+class NameCollection(Collection[NameResource]):
     """A collection of Names."""
 
     pass
 
 
-class Tag(Document):
+class TagResource(Document):
     """A Tag and meta data abaout the tag."""
 
     count: int = Field(ge=0)
@@ -94,13 +94,13 @@ class Tag(Document):
             )
 
 
-class Tags(Collection[Tag]):
+class TagCollection(Collection[TagResource]):
     """A collection of Tags."""
 
     pass
 
 
-class Allocation(Document):
+class AllocationResource(Document):
     """The record of a name given to a specific device or application."""
 
     assigned_to: str
@@ -119,7 +119,7 @@ class Allocation(Document):
             )
 
 
-class Allocations(Collection[Allocation]):
+class AllocationCollection(Collection[AllocationResource]):
     """A collection of Allocations."""
 
     pass
@@ -128,7 +128,7 @@ class Allocations(Collection[Allocation]):
 class Suggestion(Document):
     """The response constructor for a suggestion."""
 
-    name: Name
+    name: NameResource
     query: str | None = None
 
     @override
