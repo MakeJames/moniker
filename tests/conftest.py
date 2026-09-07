@@ -6,7 +6,9 @@ from pathlib import Path
 
 import pytest
 from freezegun import freeze_time
+from fastapi.testclient import TestClient
 
+from moniker.app import app
 from moniker.database import connect
 from moniker.migrate import migrate
 
@@ -26,8 +28,8 @@ def database(
         yield connection
 
 
-@freeze_time("2026-09-06T18:00:00Z")
 @pytest.fixture
+@freeze_time("2026-09-06T18:00:00Z")
 def seeded_database(
     database: sqlite3.Connection,
 ) -> sqlite3.Connection:
@@ -35,3 +37,20 @@ def seeded_database(
     seed_catalogue(database)
 
     return database
+
+
+@pytest.fixture
+def api_client(
+    seeded_database: sqlite3.Connection,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Iterator[TestClient]:
+    """Return an API client backed by the seeded test database."""
+    database = seeded_database.execute("PRAGMA database_list").fetchone()
+
+    monkeypatch.setenv(
+        "MONIKER_DATABASE",
+        database["file"],
+    )
+
+    with TestClient(app) as client:
+        yield client

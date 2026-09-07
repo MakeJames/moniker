@@ -1,4 +1,4 @@
-"""Repository methods for the Moniker catalogue.
+"""Store methods for the Moniker catalogue.
 
 Translate the persistence and domain layers.
 

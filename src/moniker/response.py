@@ -84,8 +84,6 @@ class SourceResource(Document):
     """The source material for a catelogue item."""
 
     type: str
-    items: int = Field(ge=0)
-    names: tuple[NameResource, ...] = ()
 
     @override
     def model_post_init(self, __context: Any) -> None:
