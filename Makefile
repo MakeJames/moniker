@@ -27,6 +27,32 @@ configure: \
 	$(BUILD_DIR)/moniker.service \
 	$(BUILD_DIR)/moniker.nginx
 
+$(BUILD_DIR)/moniker.env: deploy/moniker.env.in | $(BUILD_DIR)
+	sed \
+		-e 's|@DATABASE@|$(MONIKER_DATABASE)|g' \
+		-e 's|@HOST@|$(MONIKER_HOST)|g' \
+		-e 's|@PORT@|$(MONIKER_PORT)|g' \
+		-e 's|@LOG_LEVEL@|$(MONIKER_LOG_LEVEL)|g' \
+		$< > $@
+
+$(BUILD_DIR)/moniker.service: \
+		deploy/moniker.service.in | $(BUILD_DIR)
+	sed \
+		-e 's|@USER@|$(MONIKER_USER)|g' \
+		-e 's|@GROUP@|$(MONIKER_GROUP)|g' \
+		-e 's|@HOME@|$(MONIKER_HOME)|g' \
+		-e 's|@STATE@|$(MONIKER_STATE)|g' \
+		-e 's|@CONFIG@|$(MONIKER_CONFIG)|g' \
+		$< > $@
+
+$(BUILD_DIR)/moniker.nginx: \
+		deploy/moniker.nginx.in | $(BUILD_DIR)
+	sed \
+		-e 's|@SERVER_NAME@|$(MONIKER_SERVER_NAME)|g' \
+		-e 's|@HOST@|$(MONIKER_HOST)|g' \
+		-e 's|@PORT@|$(MONIKER_PORT)|g' \
+		$< > $@
+
 show-config:
 	@echo "user:        $(MONIKER_USER)"
 	@echo "group:       $(MONIKER_GROUP)"
@@ -102,7 +128,6 @@ install-user:
 	fi
 
 migrate: install install-config
-	migrate:
 	$(SUDO) -u $(MONIKER_USER) \
 		env \
 		MONIKER_DATABASE="$(MONIKER_DATABASE)" \
