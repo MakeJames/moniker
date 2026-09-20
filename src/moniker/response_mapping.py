@@ -134,9 +134,9 @@ def suggestion_href(
         query.append(("source_type", source_type))
 
     if not query:
-        return "/names/suggest"
+        return "/suggestion"
 
-    return "/names/suggest?" + urlencode(query)
+    return "/suggestion?" + urlencode(query)
 
 
 def suggestion_resource(
