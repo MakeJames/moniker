@@ -2,6 +2,8 @@
 
 import sqlite3
 
+from typing import TypedDict
+
 import pytest
 
 from moniker.domain import Source
@@ -187,7 +189,8 @@ class TestSourceStore:
                 (("Greek mythology", "mythology"),),
                 id="filters_by_type",
             ),
-            pytest.param(None, "film", (), id="filters_return_empty_when_no_match"),
+            pytest.param(None, "film", (),
+                         id="filters_return_empty_when_no_match"),
             pytest.param(
                 "Portal 2",
                 "game",
@@ -204,12 +207,14 @@ class TestSourceStore:
         expected: tuple[Source, ...],
     ) -> None:
         """R-BICEP: Right."""
-        seed_sources(database)
+        self.seed_sources(database)
         store = SourceStore(database)
 
         sources = store.list(title=title_input, source_type=type_input)
 
-        assert tuple((source.title, source.type) for source in sources) == expected
+        assert tuple(
+            (source.title, source.type) for source in sources
+        ) == expected
 
 
     @pytest.mark.parametrize(

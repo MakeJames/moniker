@@ -1,20 +1,4 @@
-"""Store methods for the Moniker catalogue.
-
-Translate the persistence and domain layers.
-
-Classes:
-
-    SourceStore
-        reads and mutates sources
-
-    NameStore
-        reads and mutates names
-        manages name to source relationships
-
-    NameEventStore
-        appends and reads lifecycle events
-
-"""
+"""The SourceStore classes and methods."""
 
 from sqlite3 import Connection
 
@@ -149,3 +133,5 @@ class SourceStore:
         """Reject empty query values while allowing omitted filters."""
         if value is not None and not value.strip():
             raise ValueError(f"{field} must not be empty")
+
+
