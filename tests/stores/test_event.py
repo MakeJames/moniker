@@ -14,9 +14,7 @@ def test_name_event_store_gets_latest_event(
     seeded_database: sqlite3.Connection,
 ) -> None:
     """R-BICEP: Right."""
-    store = NameEventStore(
-        seeded_database
-    )
+    store = NameEventStore(seeded_database)
 
     event = store.latest("apple")
 
@@ -31,9 +29,7 @@ def test_name_event_store_latest_uses_most_recent_event(
     seeded_database: sqlite3.Connection,
 ) -> None:
     """R-BICEP: Boundary."""
-    store = NameEventStore(
-        seeded_database
-    )
+    store = NameEventStore(seeded_database)
 
     event = store.latest("cherry")
 
@@ -46,9 +42,7 @@ def test_name_event_store_latest_returns_none_when_missing(
     seeded_database: sqlite3.Connection,
 ) -> None:
     """R-BICEP: Boundary."""
-    store = NameEventStore(
-        seeded_database
-    )
+    store = NameEventStore(seeded_database)
 
     assert store.latest("dragonfruit") is None
 
@@ -57,16 +51,11 @@ def test_name_event_store_returns_history_in_order(
     seeded_database: sqlite3.Connection,
 ) -> None:
     """R-BICEP: Right."""
-    store = NameEventStore(
-        seeded_database
-    )
+    store = NameEventStore(seeded_database)
 
     events = store.history("cherry")
 
-    assert tuple(
-        event.event
-        for event in events
-    ) == (
+    assert tuple(event.event for event in events) == (
         NameEventType.CREATED,
         NameEventType.ALLOCATED,
         NameEventType.RELEASED,
@@ -77,13 +66,9 @@ def test_name_event_store_returns_empty_history_when_missing(
     seeded_database: sqlite3.Connection,
 ) -> None:
     """R-BICEP: Boundary."""
-    store = NameEventStore(
-        seeded_database
-    )
+    store = NameEventStore(seeded_database)
 
-    assert store.history(
-        "dragonfruit"
-    ) == ()
+    assert store.history("dragonfruit") == ()
 
 
 def test_name_event_store_appends_event(
@@ -122,9 +107,7 @@ def test_name_event_store_appends_event(
 
     assert result == event
 
-    persisted = store.latest(
-        "dragonfruit"
-    )
+    persisted = store.latest("dragonfruit")
 
     assert persisted == event
 
@@ -142,9 +125,7 @@ def test_name_event_store_rejects_unknown_name(
         occurred_at=datetime.now(UTC),
     )
 
-    with pytest.raises(
-        sqlite3.IntegrityError
-    ):
+    with pytest.raises(sqlite3.IntegrityError):
         store.append(event)
 
 
@@ -152,9 +133,7 @@ def test_name_event_store_rejects_invalid_event_state(
     seeded_database: sqlite3.Connection,
 ) -> None:
     """R-BICEP: Error."""
-    store = NameEventStore(
-        seeded_database
-    )
+    store = NameEventStore(seeded_database)
 
     event = NameEvent(
         name="apple",
@@ -168,7 +147,5 @@ def test_name_event_store_rejects_invalid_event_state(
         ),
     )
 
-    with pytest.raises(
-        sqlite3.IntegrityError
-    ):
+    with pytest.raises(sqlite3.IntegrityError):
         store.append(event)

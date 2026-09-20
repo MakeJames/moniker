@@ -165,7 +165,6 @@ class TestNameStore:
 
         assert self.name_values(names) == expected
 
-
     @pytest.mark.parametrize(
         "filters",
         [
@@ -229,10 +228,7 @@ class TestNameStore:
             "storage",
             "sweet",
         )
-        assert tuple(
-            source.title
-            for source in name.sources
-        ) == (
+        assert tuple(source.title for source in name.sources) == (
             "Orchard",
             "Root Cellar",
         )
@@ -265,7 +261,6 @@ class TestNameStore:
         store = NameStore(seeded_database)
 
         assert store.get("dragonfruit") is None
-
 
     @pytest.mark.parametrize(
         "value",
@@ -707,10 +702,7 @@ class TestNameStore:
             ),
         )
 
-        assert tuple(
-            source.title
-            for source in updated.sources
-        ) == (
+        assert tuple(source.title for source in updated.sources) == (
             "Berry Patch",
             "Orchard",
         )
@@ -759,13 +751,10 @@ class TestNameStore:
         catalogue_item_count: int,
     ) -> None:
         """R-BICEP: Boundary."""
-        store = NameStore(
-            seeded_database
-        )
+        store = NameStore(seeded_database)
 
         names = store.list(enabled=None, state=None)
         values = self.name_values(names)
-
 
         assert len(values) == catalogue_item_count
         assert "apple" in values

@@ -59,9 +59,7 @@ class NameEventStore:
                 event.assigned_to,
                 event.event.value,
                 event.state.value,
-                to_utc_string(
-                    event.occurred_at
-                ),
+                to_utc_string(event.occurred_at),
             ),
         )
 

@@ -133,5 +133,3 @@ class SourceStore:
         """Reject empty query values while allowing omitted filters."""
         if value is not None and not value.strip():
             raise ValueError(f"{field} must not be empty")
-
-

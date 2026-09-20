@@ -21,12 +21,14 @@ EVENT_STATES = {
     NameEventType.RELEASED: NameState.AVAILABLE,
 }
 
+
 def _timestamp(value: str | datetime) -> str:
     """Return a fixture timestamp in Moniker's UTC storage format."""
     if isinstance(value, datetime):
         return to_utc_string(value)
 
     return value
+
 
 def _load_catalogue_fixture(
     path: Path = FIXTURE_PATH,
@@ -36,9 +38,7 @@ def _load_catalogue_fixture(
         data = yaml.safe_load(fixture)
 
     if not isinstance(data, dict):
-        raise ValueError(
-            "Catalogue fixture must contain a mapping"
-        )
+        raise ValueError("Catalogue fixture must contain a mapping")
     return data
 
 
@@ -66,10 +66,7 @@ def _seed_sources(
         ),
     )
 
-    return {
-        source["title"]: source
-        for source in sources
-    }
+    return {source["title"]: source for source in sources}
 
 
 def _seed_name(
@@ -136,9 +133,7 @@ def _seed_name_sources(
     ):
         if source_title not in sources_by_title:
             raise ValueError(
-                "Unknown source "
-                f"{source_title!r} "
-                f"for name {item['value']!r}"
+                f"Unknown source {source_title!r} for name {item['value']!r}"
             )
 
         source = sources_by_title[source_title]
@@ -187,9 +182,7 @@ def _seed_events(
     )
 
     for event in item.get("events", ()):
-        event_type = NameEventType(
-            event["event"]
-        )
+        event_type = NameEventType(event["event"])
 
         connection.execute(
             """
@@ -253,6 +246,7 @@ def seed_catalogue(
         )
 
     connection.commit()
+
 
 def catalogue_name_count() -> int:
     """Return the number of names in the catalogue fixture."""

@@ -168,12 +168,7 @@ class NameStore:
         """
 
         self.connection.execute(
-            query,
-            (
-                name.value,
-                name.description,
-                name.enabled
-            )
+            query, (name.value, name.description, name.enabled)
         )
 
         return name
@@ -190,9 +185,7 @@ class NameStore:
         """
         params: list[tuple[str, ...]] = []
         self._validate_query_value(name.value, "name")
-        unique_tags = tuple(
-            dict.fromkeys(tags)
-        )
+        unique_tags = tuple(dict.fromkeys(tags))
 
         for tag in unique_tags:
             self._validate_query_value(tag, "tag")
@@ -358,10 +351,13 @@ class NameStore:
             enabled=enabled,
             state=state,
         )
-        query = query + """
+        query = (
+            query
+            + """
             order by random()
             limit 1
         """
+        )
         result = self.connection.execute(query, params).fetchone()
         name = self._hydrate_names((result,))
 
@@ -396,7 +392,6 @@ class NameStore:
         if name is not None:
             filters.append("names.name = ?")
             params.append(name)
-
 
         for tag in unique_tags:
             filters.append(
@@ -441,7 +436,7 @@ class NameStore:
                 "        and ".join(source_filters),
                 """
                 )
-                """
+                """,
             )
 
             filters.append("".join(source_filter))
@@ -453,7 +448,6 @@ class NameStore:
             " where " + " and ".join(filters),
             tuple(params),
         )
-
 
     def _build_query(
         self,
@@ -490,7 +484,6 @@ class NameStore:
         )
 
         return query + filters, params
-
 
     def _hydrate_names(
         self,
@@ -546,9 +539,7 @@ class NameStore:
         sources_by_name: dict[str, list[Source]] = {name: [] for name in names}
 
         for row in tag_rows:
-            tags_by_name[row["name"]].append(
-                row["tag"]
-            )
+            tags_by_name[row["name"]].append(row["tag"])
 
         for row in source_rows:
             sources_by_name[row["name"]].append(
@@ -565,16 +556,11 @@ class NameStore:
                 description=row["description"],
                 enabled=bool(row["enabled"]),
                 state=NameState(row["state"]),
-                tags=tuple(
-                    tags_by_name[row["name"]]
-                ),
-                sources=tuple(
-                    sources_by_name[row["name"]]
-                ),
+                tags=tuple(tags_by_name[row["name"]]),
+                sources=tuple(sources_by_name[row["name"]]),
             )
             for row in rows
         )
-
 
     @staticmethod
     def _validate_query_value(
@@ -587,9 +573,4 @@ class NameStore:
     @staticmethod
     def _escape_like(value: str) -> str:
         """Escape characters with special meaning in SQLite LIKE patterns."""
-        return (
-            value
-            .replace("!", "!!")
-            .replace("%", "!%")
-            .replace("_", "!_")
-        )
+        return value.replace("!", "!!").replace("%", "!%").replace("_", "!_")

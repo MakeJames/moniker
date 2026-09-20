@@ -30,6 +30,7 @@ type ResponseDescriptions = dict[
     dict[str, Any],
 ]
 
+
 class ErrorResponse(BaseModel):
     """A standard error returned by the Moniker API."""
 

@@ -86,7 +86,6 @@ class Catalogue:
         self.names = NameStore(connection)
         self.events = NameEventStore(connection)
 
-
     def _current_name(
         self,
         value: str,
@@ -95,9 +94,7 @@ class Catalogue:
         name = self.names.get(value)
 
         if name is None:
-            raise NameNotFoundError(
-                f"Name not found: {value}"
-            )
+            raise NameNotFoundError(f"Name not found: {value}")
 
         return name
 
@@ -274,9 +271,7 @@ class Catalogue:
         current = self._current_name(name)
 
         if not current.enabled or current.state != NameState.AVAILABLE:
-            raise InvalidNameTransitionError(
-                f"Name [{name}] is not available."
-            )
+            raise InvalidNameTransitionError(f"Name [{name}] is not available.")
 
         event = NameEvent(
             name=name,
@@ -298,9 +293,7 @@ class Catalogue:
         current = self._current_name(name)
 
         if not current.enabled or current.state != NameState.AVAILABLE:
-            raise InvalidNameTransitionError(
-                f"Name [{name}] is not available."
-            )
+            raise InvalidNameTransitionError(f"Name [{name}] is not available.")
 
         event = NameEvent(
             name=name,
@@ -312,7 +305,6 @@ class Catalogue:
 
         with self.connection:
             return self.events.append(event)
-
 
     def release_name(
         self,

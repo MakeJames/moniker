@@ -57,6 +57,7 @@ def api_client(
     with TestClient(app) as client:
         yield client
 
+
 @pytest.fixture
 def catalogue_item_count() -> int:
     """Return the number of names in the catalogue fixture."""

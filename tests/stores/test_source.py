@@ -9,7 +9,6 @@ from moniker.domain import Source
 from moniker.stores import SourceStore
 
 
-
 class TestSourceStore:
     """Test the methods of the SourceStore."""
 
@@ -52,7 +51,6 @@ class TestSourceStore:
         )
 
         connection.commit()
-
 
     @pytest.mark.parametrize(
         ("title_input", "type_input", "expected"),
@@ -114,7 +112,6 @@ class TestSourceStore:
 
         assert source == expected
 
-
     @pytest.mark.parametrize(
         ("title_input", "type_input"),
         [
@@ -158,7 +155,6 @@ class TestSourceStore:
                 type_input,
             )
 
-
     @pytest.mark.parametrize(
         ("title_input", "type_input", "expected"),
         [
@@ -188,8 +184,9 @@ class TestSourceStore:
                 (("Greek mythology", "mythology"),),
                 id="filters_by_type",
             ),
-            pytest.param(None, "film", (),
-                         id="filters_return_empty_when_no_match"),
+            pytest.param(
+                None, "film", (), id="filters_return_empty_when_no_match"
+            ),
             pytest.param(
                 "Portal 2",
                 "game",
@@ -211,10 +208,9 @@ class TestSourceStore:
 
         sources = store.list(title=title_input, source_type=type_input)
 
-        assert tuple(
-            (source.title, source.type) for source in sources
-        ) == expected
-
+        assert (
+            tuple((source.title, source.type) for source in sources) == expected
+        )
 
     @pytest.mark.parametrize(
         ("title_input", "type_input"),
@@ -263,7 +259,6 @@ class TestSourceStore:
                 title=title_input,
                 source_type=type_input,
             )
-
 
     @pytest.mark.parametrize(
         "source",
@@ -317,7 +312,6 @@ class TestSourceStore:
         assert row["title"] == source.title
         assert row["description"] == source.description
         assert row["type"] == source.type
-
 
     @pytest.mark.parametrize(
         "source",

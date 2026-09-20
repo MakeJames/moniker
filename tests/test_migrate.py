@@ -31,6 +31,7 @@ def migration_database(
     finally:
         connection.close()
 
+
 def test_migrations_reject_unrecognised_filename(
     tmp_path: Path,
 ) -> None:
@@ -108,8 +109,9 @@ def test_migration_must_set_schema_version(
 
     migration = Migration(version=1, name="missing_version", path=path)
 
-    with pytest.raises(RuntimeError,
-                       match="did not set PRAGMA user_version = 1"):
+    with pytest.raises(
+        RuntimeError, match="did not set PRAGMA user_version = 1"
+    ):
         apply_migration(migration_database, migration)
 
     assert current_version(migration_database) == 0
@@ -124,8 +126,9 @@ def test_migrate_rejects_newer_database(
 
     migration_database.execute(f"PRAGMA user_version = {unsupported}")
 
-    with pytest.raises(RuntimeError,
-                       match="newer than this application supports"):
+    with pytest.raises(
+        RuntimeError, match="newer than this application supports"
+    ):
         migrate(migration_database)
 
 
@@ -133,19 +136,19 @@ def test_migrations_reject_version_gap(
     tmp_path: Path,
 ) -> None:
     """R-BICEP: Error."""
-    first = Migration(version=1, name="initial",
-                      path=tmp_path / "0001_initial.sql")
-    third = Migration(version=3, name="third",
-                      path=tmp_path / "0003_third.sql")
+    first = Migration(
+        version=1, name="initial", path=tmp_path / "0001_initial.sql"
+    )
+    third = Migration(version=3, name="third", path=tmp_path / "0003_third.sql")
 
-    with pytest.raises(RuntimeError,
-                       match="Expected migration 0002, found 0003"):
+    with pytest.raises(
+        RuntimeError, match="Expected migration 0002, found 0003"
+    ):
         validate_migrations((first, third))
 
 
 def test_migrations_create_latest_schema(
-    tmp_path: Path,
-    migration_database: sqlite3.Connection
+    tmp_path: Path, migration_database: sqlite3.Connection
 ) -> None:
     """R-BICEP: Right."""
     number_of_migrations = len(discover_migrations())
@@ -159,8 +162,7 @@ def test_migrations_create_latest_schema(
 
 
 def test_migrations_can_be_run_twice(
-    tmp_path: Path,
-    migration_database: sqlite3.Connection
+    tmp_path: Path, migration_database: sqlite3.Connection
 ) -> None:
     """R-BICEP: Boundary."""
     connection = migration_database

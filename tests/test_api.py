@@ -265,13 +265,12 @@ def test_create_source_persists_between_requests(
     assert get_response.status_code == status.HTTP_200_OK
     assert get_response.json()["title"] == "Earthsea"
 
+
 def test_get_source_returns_not_found(
     api_client: TestClient,
 ) -> None:
     """R-BICEP: Boundary."""
-    response = api_client.get(
-        "/sources/growing-area/Does%20Not%20Exist"
-    )
+    response = api_client.get("/sources/growing-area/Does%20Not%20Exist")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {

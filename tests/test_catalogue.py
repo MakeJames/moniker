@@ -108,10 +108,13 @@ class TestSourceCatalogue:
         created = catalogue.create_source(source)
 
         assert created == source
-        assert catalogue.get_source(
-            "Polytunnel",
-            "growing-area",
-        ) == source
+        assert (
+            catalogue.get_source(
+                "Polytunnel",
+                "growing-area",
+            )
+            == source
+        )
 
     def test_catalogue_rejects_duplicate_source(
         self,
@@ -409,17 +412,12 @@ class TestCreateNameCatalogue:
             "fruit",
             "stone-fruit",
         )
-        assert tuple(
-            source.title
-            for source in created.sources
-        ) == (
+        assert tuple(source.title for source in created.sources) == (
             "Orchard",
             "Root Cellar",
         )
 
-        history = catalogue.name_history(
-            "nectarine"
-        )
+        history = catalogue.name_history("nectarine")
 
         assert len(history) == 1
 
@@ -471,9 +469,7 @@ class TestCreateNameCatalogue:
 
         seeded_database.rollback()
 
-        persisted = catalogue.get_name(
-            "radicchio"
-        )
+        persisted = catalogue.get_name("radicchio")
 
         assert persisted is not None
         assert persisted.value == "radicchio"
@@ -496,9 +492,7 @@ class TestCreateNameCatalogue:
         existing = catalogue.get_name("apple")
 
         assert existing is not None
-        assert existing.description == (
-            "Test fruit entry for apple."
-        )
+        assert existing.description == ("Test fruit entry for apple.")
 
     def test_catalogue_creates_missing_source(
         self,
@@ -579,9 +573,7 @@ class TestCreateNameCatalogue:
             name: Name,
             tags: tuple[str, ...],
         ) -> Name:
-            raise RuntimeError(
-                "forced fixture failure"
-            )
+            raise RuntimeError("forced fixture failure")
 
         monkeypatch.setattr(
             catalogue.names,
@@ -637,9 +629,7 @@ class TestCreateNameCatalogue:
         seeded_database: sqlite3.Connection,
     ) -> None:
         """R-BICEP: Boundary."""
-        catalogue = Catalogue(
-            seeded_database
-        )
+        catalogue = Catalogue(seeded_database)
 
         source = Source(
             title="Secret Garden",
@@ -647,9 +637,7 @@ class TestCreateNameCatalogue:
             type="growing-area",
         )
 
-        with pytest.raises(
-            NameAlreadyExistsError
-        ):
+        with pytest.raises(NameAlreadyExistsError):
             catalogue.create_name(
                 Name(
                     value="apple",
@@ -675,23 +663,15 @@ class TestNameHistoryCatalogue:
         """R-BICEP: Right."""
         catalogue = Catalogue(seeded_database)
 
-        history = catalogue.name_history(
-            "cherry"
-        )
+        history = catalogue.name_history("cherry")
 
-        assert tuple(
-            event.event
-            for event in history
-        ) == (
+        assert tuple(event.event for event in history) == (
             NameEventType.CREATED,
             NameEventType.ALLOCATED,
             NameEventType.RELEASED,
         )
 
-        assert tuple(
-            event.state
-            for event in history
-        ) == (
+        assert tuple(event.state for event in history) == (
             NameState.AVAILABLE,
             NameState.ALLOCATED,
             NameState.AVAILABLE,
@@ -705,9 +685,7 @@ class TestNameHistoryCatalogue:
         catalogue = Catalogue(seeded_database)
 
         with pytest.raises(NameNotFoundError):
-            catalogue.name_history(
-                "dragonfruit"
-            )
+            catalogue.name_history("dragonfruit")
 
 
 class TestAllocateNameCatalogue:
@@ -739,16 +717,12 @@ class TestAllocateNameCatalogue:
             tzinfo=UTC,
         )
 
-        name = catalogue.get_name(
-            "apricot"
-        )
+        name = catalogue.get_name("apricot")
 
         assert name is not None
         assert name.state == NameState.ALLOCATED
 
-        history = catalogue.name_history(
-            "apricot"
-        )
+        history = catalogue.name_history("apricot")
 
         assert history[-1] == event
 
@@ -851,9 +825,7 @@ class TestReserveNameCatalogue:
         assert event.event == NameEventType.RESERVED
         assert event.state == NameState.RESERVED
 
-        name = catalogue.get_name(
-            "blackberry"
-        )
+        name = catalogue.get_name("blackberry")
 
         assert name is not None
         assert name.state == NameState.RESERVED
@@ -1001,9 +973,7 @@ class TestReleaseNameCatalogue:
         catalogue = Catalogue(seeded_database)
 
         with pytest.raises(InvalidNameTransitionError):
-            catalogue.release_name(
-                "apricot"
-            )
+            catalogue.release_name("apricot")
 
     def test_catalogue_rejects_release_of_missing_name(
         self,
