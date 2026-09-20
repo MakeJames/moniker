@@ -1,0 +1,14 @@
+MONIKER_USER ?= moniker
+MONIKER_GROUP ?= moniker
+
+MONIKER_HOME ?= /opt/moniker
+MONIKER_STATE ?= /var/lib/moniker
+MONIKER_CONFIG ?= /etc/moniker
+
+MONIKER_HOST ?= 127.0.0.1
+MONIKER_PORT ?= 8042
+
+MONIKER_LOG_LEVEL ?= info
+MONIKER_DATABASE ?= $(MONIKER_STATE)/moniker.db
+
+MONIKER_SERVER_NAME ?= moniker.local

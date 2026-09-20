@@ -1,0 +1,24 @@
+[Unit]
+Description=Moniker naming service
+After=network.target
+
+[Service]
+Type=simple
+
+User=@USER@
+Group=@GROUP@
+
+WorkingDirectory=@STATE@
+EnvironmentFile=@CONFIG@/moniker.env
+
+ExecStart=@HOME@/.venv/bin/uvicorn \
+    moniker.app:app \
+    --host ${MONIKER_HOST} \
+    --port ${MONIKER_PORT} \
+    --log-level ${MONIKER_LOG_LEVEL}
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
