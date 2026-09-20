@@ -39,6 +39,7 @@ class NameEventStore:
     ) -> NameEvent:
         """Append an event to a name's lifecycle history."""
         self._validate_query_value(event.name, "name")
+        self._validate_query_value(event.assigned_to, "assigned_to")
 
         query = """
             insert into name_events (
