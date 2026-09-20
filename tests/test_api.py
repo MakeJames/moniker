@@ -35,26 +35,26 @@ def test_application_root() -> None:
     [
         pytest.param(
             "",
-            4,
+            5,
             id="all_sources",
         ),
         pytest.param(
-            "?source_type=book",
-            3,
+            "?source_type=growing-area",
+            4,
             id="filters_by_type",
         ),
         pytest.param(
-            "?title=Doctor%20Who",
+            "?title=Orchard",
             1,
             id="filters_by_title",
         ),
         pytest.param(
-            "?title=Doctor%20Who&source_type=television",
+            "?title=Orchard&source_type=growing-area",
             1,
             id="filters_by_title_and_type",
         ),
         pytest.param(
-            "?source_type=film",
+            "?source_type=market",
             0,
             id="no_matches",
         ),
@@ -76,22 +76,22 @@ def test_list_sources(
     ("path", "expected_title", "expected_type"),
     [
         pytest.param(
-            "/sources/television/Doctor%20Who",
-            "Doctor Who",
-            "television",
-            id="television_source",
+            "/sources/growing-area/Orchard",
+            "Orchard",
+            "growing-area",
+            id="orchard",
         ),
         pytest.param(
-            "/sources/book/His%20Dark%20Materials",
-            "His Dark Materials",
-            "book",
-            id="book_source",
-        ),
-        pytest.param(
-            "/sources/book/Howl%27s%20Moving%20Castle",
-            "Howl's Moving Castle",
-            "book",
+            "/sources/growing-area/Kitchen%20Garden",
+            "Kitchen Garden",
+            "growing-area",
             id="encoded_title",
+        ),
+        pytest.param(
+            "/sources/storage-area/Root%20Cellar",
+            "Root Cellar",
+            "storage-area",
+            id="storage_source",
         ),
     ],
 )
@@ -172,17 +172,17 @@ def test_create_source_rejects_invalid_payload(
     [
         pytest.param(
             {
-                "title": "Doctor Who",
+                "title": "Orchard",
                 "description": None,
-                "type": "television",
+                "type": "growing-area",
             },
-            id="existing_television_source",
+            id="existing_growing_area_source",
         ),
         pytest.param(
             {
-                "title": "His Dark Materials",
+                "title": "Root Cellar",
                 "description": "Different description.",
-                "type": "book",
+                "type": "storage-area",
             },
             id="duplicate_identity_different_metadata",
         ),
@@ -206,19 +206,17 @@ def test_create_source_rejects_duplicate(
     [
         pytest.param(
             {
-                "title": "Earthsea",
-                "description": (
-                    "A fantasy setting created by Ursula K. Le Guin."
-                ),
-                "type": "book",
+                "title": "Polytunnel",
+                "description": "A covered growing area.",
+                "type": "growing-area",
             },
             id="with_description",
         ),
         pytest.param(
             {
-                "title": "Greek mythology",
+                "title": "Market Stall",
                 "description": None,
-                "type": "mythology",
+                "type": "market",
             },
             id="without_description",
         ),

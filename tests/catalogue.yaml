@@ -1,0 +1,299 @@
+defaults:
+  created_at: 2026-09-06T18:00:00Z
+  enabled: true
+
+sources:
+  - title: Orchard
+    description: A (usually) organised area of fruit trees.
+    type: growing-area
+
+  - title: Kitchen Garden
+    description: A cultivated area for vegetables and herbs.
+    type: growing-area
+
+  - title: Greenhouse
+    description: A protected growing area for warmer or more delicate crops.
+    type: growing-area
+
+  - title: Berry Patch
+    description: A growing area for soft fruit and berries.
+    type: growing-area
+
+  - title: Root Cellar
+    description: A cool storage area for produce suited to longer-term keeping.
+    type: storage-area
+
+names:
+  - value: apple
+    description: Test fruit entry for apple.
+    tags:
+      - fruit
+      - orchard
+      - sweet
+      - storage
+    sources:
+      - Orchard
+      - Root Cellar
+    events:
+      - event: allocated
+        assigned_to: device-01
+        at: 2026-09-06T19:00:00Z
+
+  - value: apricot
+    description: Test fruit entry for apricot.
+    tags:
+      - fruit
+      - orchard
+      - sweet
+      - stone-fruit
+    sources:
+      - Orchard
+
+  - value: blackberry
+    description: Test fruit entry for blackberry.
+    tags:
+      - fruit
+      - berry
+      - sweet
+    sources:
+      - Berry Patch
+
+  - value: blueberry
+    description: Test fruit entry for blueberry.
+    tags:
+      - fruit
+      - berry
+      - sweet
+    sources:
+      - Berry Patch
+    events:
+      - event: reserved
+        assigned_to: device-02
+        at: 2026-09-06T19:10:00Z
+
+  - value: cherry
+    description: Test fruit entry for cherry.
+    tags:
+      - fruit
+      - orchard
+      - sweet
+      - stone-fruit
+    sources:
+      - Orchard
+    events:
+      - event: allocated
+        assigned_to: device-03
+        at: 2026-09-06T19:20:00Z
+      - event: released
+        assigned_to: device-03
+        at: 2026-09-06T20:20:00Z
+
+  - value: pear
+    description: Test fruit entry for pear.
+    tags:
+      - fruit
+      - orchard
+      - sweet
+      - storage
+    sources:
+      - Orchard
+      - Root Cellar
+
+  - value: peach
+    description: Test fruit entry for peach.
+    tags:
+      - fruit
+      - orchard
+      - sweet
+      - stone-fruit
+    sources:
+      - Orchard
+
+  - value: plum
+    description: Test fruit entry for plum.
+    tags:
+      - fruit
+      - orchard
+      - stone-fruit
+    sources:
+      - Orchard
+
+  - value: strawberry
+    description: Test fruit entry for strawberry.
+    tags:
+      - fruit
+      - berry
+      - sweet
+    sources:
+      - Berry Patch
+
+  - value: carrot
+    description: Test vegetable entry for carrot.
+    tags:
+      - vegetable
+      - root
+      - storage
+    sources:
+      - Kitchen Garden
+      - Root Cellar
+    events:
+      - event: allocated
+        assigned_to: device-04
+        at: 2026-09-06T19:30:00Z
+
+  - value: beetroot
+    description: Test vegetable entry for beetroot.
+    tags:
+      - vegetable
+      - root
+      - storage
+    sources:
+      - Kitchen Garden
+      - Root Cellar
+
+  - value: parsnip
+    description: Test vegetable entry for parsnip.
+    tags:
+      - vegetable
+      - root
+      - storage
+    sources:
+      - Kitchen Garden
+      - Root Cellar
+
+  - value: turnip
+    description: Disabled root vegetable used for filtering tests.
+    enabled: false
+    tags:
+      - vegetable
+      - root
+      - storage
+    sources:
+      - Kitchen Garden
+      - Root Cellar
+
+  - value: cabbage
+    description: Test leafy vegetable entry for cabbage.
+    tags:
+      - vegetable
+      - leafy
+      - brassica
+    sources:
+      - Kitchen Garden
+
+  - value: kale
+    description: Test leafy vegetable entry for kale.
+    tags:
+      - vegetable
+      - leafy
+      - brassica
+    sources:
+      - Kitchen Garden
+    events:
+      - event: reserved
+        assigned_to: device-05
+        at: 2026-09-06T19:40:00Z
+
+  - value: broccoli
+    description: Test vegetable entry for broccoli.
+    tags:
+      - vegetable
+      - brassica
+    sources:
+      - Kitchen Garden
+
+  - value: spinach
+    description: Test leafy vegetable entry for spinach.
+    tags:
+      - vegetable
+      - leafy
+    sources:
+      - Kitchen Garden
+
+  - value: tomato
+    description: Test produce entry for tomato.
+    tags:
+      - fruit
+      - vegetable
+      - greenhouse
+    sources:
+      - Greenhouse
+    events:
+      - event: allocated
+        assigned_to: device-06
+        at: 2026-09-06T19:50:00Z
+
+  - value: pepper
+    description: Test vegetable entry for pepper.
+    tags:
+      - vegetable
+      - greenhouse
+    sources:
+      - Greenhouse
+
+  - value: cucumber
+    description: Test vegetable entry for cucumber.
+    tags:
+      - vegetable
+      - vine
+      - greenhouse
+    sources:
+      - Greenhouse
+    events:
+      - event: allocated
+        assigned_to: device-07
+        at: 2026-09-06T20:00:00Z
+      - event: released
+        assigned_to: device-07
+        at: 2026-09-06T21:00:00Z
+
+  - value: courgette
+    description: Test vegetable entry for courgette.
+    tags:
+      - vegetable
+      - vine
+    sources:
+      - Kitchen Garden
+
+  - value: onion
+    description: Test vegetable entry for onion.
+    tags:
+      - vegetable
+      - allium
+      - storage
+    sources:
+      - Kitchen Garden
+      - Root Cellar
+
+  - value: garlic
+    description: Test vegetable entry for garlic.
+    tags:
+      - vegetable
+      - allium
+      - storage
+    sources:
+      - Kitchen Garden
+      - Root Cellar
+
+  - value: lemon
+    description: Test citrus fruit entry for lemon.
+    tags:
+      - fruit
+      - citrus
+      - greenhouse
+    sources:
+      - Greenhouse
+    events:
+      - event: reserved
+        assigned_to: device-08
+        at: 2026-09-06T20:10:00Z
+
+  - value: lime
+    description: Disabled citrus fruit used for filtering tests.
+    enabled: false
+    tags:
+      - fruit
+      - citrus
+      - greenhouse
+    sources:
+      - Greenhouse
