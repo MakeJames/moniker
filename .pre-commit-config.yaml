@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: Ruff Format
+        entry: uv run ruff format .
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: ruff-fix-imports
+        name: Ruff Fix Imports
+        entry: uv run ruff check --select I --fix .
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: ruff-check
+        name: Ruff Check (lint)
+        entry: uv run ruff check
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: mypy-check
+        name: MyPy Check (lint)
+        entry: uv run mypy src/
+        language: system
+        types: [python]
+        pass_filenames: false
