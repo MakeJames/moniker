@@ -24,7 +24,6 @@ from pydantic import BaseModel
 
 from moniker.catalogue import SourceAlreadyExistsError
 
-
 type ResponseDescriptions = dict[
     int | str,
     dict[str, Any],

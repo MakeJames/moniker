@@ -4,7 +4,6 @@ import os
 import sqlite3
 from pathlib import Path
 
-
 DEFAULT_DATABASE_PATH = Path("data/moniker.db")
 
 

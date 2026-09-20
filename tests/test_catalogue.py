@@ -1,12 +1,10 @@
 """Test application orchestration for the Moniker catalogue."""
 
 import sqlite3
-
 from datetime import UTC, datetime
 from typing import TypedDict
 
 import pytest
-
 from freezegun import freeze_time
 
 from moniker.catalogue import (

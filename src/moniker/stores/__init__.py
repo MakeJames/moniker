@@ -21,7 +21,6 @@ from moniker.stores.event import NameEventStore
 from moniker.stores.name import NameStore
 from moniker.stores.source import SourceStore
 
-
 __all__ = [
     "MonikerReadWriteError",
     "NameEventStore",

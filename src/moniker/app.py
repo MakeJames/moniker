@@ -4,8 +4,6 @@ from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Query, Response, status
 
-from moniker.response import ApplicationRoot, Link
-
 from moniker.dependencies import CatalogueDependency
 from moniker.domain import Source
 from moniker.errors import (
@@ -13,7 +11,12 @@ from moniker.errors import (
     SOURCE_NOT_FOUND_RESPONSE,
     register_exception_handlers,
 )
-from moniker.response import SourceCollection, SourceResource
+from moniker.response import (
+    ApplicationRoot,
+    Link,
+    SourceCollection,
+    SourceResource,
+)
 from moniker.response_mapping import source_href, source_resource
 
 SourceFilter = Annotated[

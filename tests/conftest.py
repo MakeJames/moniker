@@ -5,14 +5,13 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from freezegun import freeze_time
 from fastapi.testclient import TestClient
+from freezegun import freeze_time
 
 from moniker.app import app
 from moniker.database import connect
 from moniker.migrate import migrate
-
-from tests.fixtures import seed_catalogue, catalogue_name_count
+from tests.fixtures import catalogue_name_count, seed_catalogue
 
 
 @pytest.fixture

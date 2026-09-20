@@ -1,7 +1,7 @@
 """Response definitions for the Moniker package."""
 
 from datetime import datetime
-from typing import Any, Generic, override, Self, TypeVar
+from typing import Any, Generic, Self, TypeVar, override
 
 from pydantic import BaseModel, Field
 

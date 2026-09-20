@@ -3,7 +3,6 @@
 from datetime import UTC, datetime
 
 import pytest
-
 from freezegun import freeze_time
 
 from moniker.utils import to_utc_datetime, to_utc_string, utc_now

@@ -1,10 +1,8 @@
 """Test the api routes."""
 
 import pytest
-
 from fastapi import status
 from fastapi.testclient import TestClient
-
 
 from moniker.app import app
 

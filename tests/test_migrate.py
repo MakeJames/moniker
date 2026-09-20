@@ -1,7 +1,6 @@
 """Test the ability for Moniker to upgrade its database."""
 
 import sqlite3
-
 from collections.abc import Iterator
 from pathlib import Path
 

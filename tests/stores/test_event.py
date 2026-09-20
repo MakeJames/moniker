@@ -1,8 +1,7 @@
 """Test the methods of the event module."""
 
 import sqlite3
-
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 import pytest
 

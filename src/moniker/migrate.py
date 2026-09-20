@@ -7,7 +7,6 @@ from pathlib import Path
 
 from moniker.database import connect, database_path
 
-
 MIGRATIONS_PATH = Path(__file__).with_name("migrations")
 
 MIGRATION_PATTERN = re.compile(

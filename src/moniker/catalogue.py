@@ -25,13 +25,12 @@ Classes:
 
 from sqlite3 import Connection, IntegrityError
 
-
-from moniker.domain import Source, NameState, Name, NameEvent, NameEventType
+from moniker.domain import Name, NameEvent, NameEventType, NameState, Source
 from moniker.stores import (
+    MonikerReadWriteError,
     NameEventStore,
     NameStore,
     SourceStore,
-    MonikerReadWriteError,
 )
 from moniker.utils import utc_now
 

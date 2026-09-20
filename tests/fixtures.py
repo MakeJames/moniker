@@ -1,7 +1,6 @@
 """Reusable test data and database seed helpers."""
 
 import sqlite3
-
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -10,7 +9,6 @@ import yaml
 
 from moniker.domain import NameEventType, NameState
 from moniker.utils import to_utc_string
-
 
 FIXTURE_PATH = Path(__file__).parent / "catalogue.yaml"
 
