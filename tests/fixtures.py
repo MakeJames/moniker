@@ -4,7 +4,7 @@ import sqlite3
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Collection
+from typing import Any
 
 import yaml
 

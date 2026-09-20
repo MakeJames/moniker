@@ -16,6 +16,8 @@ manage database transactions
 
 """
 
+from typing import Any
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -23,20 +25,25 @@ from pydantic import BaseModel
 from moniker.catalogue import SourceAlreadyExistsError
 
 
+type ResponseDescriptions = dict[
+    int | str,
+    dict[str, Any],
+]
+
 class ErrorResponse(BaseModel):
     """A standard error returned by the Moniker API."""
 
     detail: str
 
 
-SOURCE_NOT_FOUND_RESPONSE = {
+SOURCE_NOT_FOUND_RESPONSE: ResponseDescriptions = {
     status.HTTP_404_NOT_FOUND: {
         "model": ErrorResponse,
         "description": "The requested source does not exist.",
     },
 }
 
-SOURCE_CREATE_RESPONSES = {
+SOURCE_CREATE_RESPONSES: ResponseDescriptions = {
     status.HTTP_409_CONFLICT: {
         "model": ErrorResponse,
         "description": "A source with this title and type already exists.",

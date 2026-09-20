@@ -2,7 +2,6 @@
 
 import sqlite3
 
-from typing import TypedDict
 
 import pytest
 
