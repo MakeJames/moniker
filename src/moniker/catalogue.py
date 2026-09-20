@@ -25,6 +25,7 @@ Classes:
 
 from sqlite3 import Connection, IntegrityError
 
+from moniker.database import immediate_transaction
 from moniker.domain import Name, NameEvent, NameEventType, NameState, Source
 from moniker.stores import (
     MonikerReadWriteError,
@@ -269,20 +270,22 @@ class Catalogue:
         assigned_to: str,
     ) -> NameEvent:
         """Allocate an available name."""
-        current = self._current_name(name)
+        with immediate_transaction(self.connection):
+            current = self._current_name(name)
 
-        if not current.enabled or current.state != NameState.AVAILABLE:
-            raise InvalidNameTransitionError(f"Name [{name}] is not available.")
+            if not current.enabled or current.state != NameState.AVAILABLE:
+                raise InvalidNameTransitionError(
+                    f"Name [{name}] is not available.",
+                )
 
-        event = NameEvent(
-            name=name,
-            assigned_to=assigned_to,
-            event=NameEventType.ALLOCATED,
-            state=NameState.ALLOCATED,
-            occurred_at=utc_now(),
-        )
+            event = NameEvent(
+                name=name,
+                assigned_to=assigned_to,
+                event=NameEventType.ALLOCATED,
+                state=NameState.ALLOCATED,
+                occurred_at=utc_now(),
+            )
 
-        with self.connection:
             return self.events.append(event)
 
     def reserve_name(
@@ -291,20 +294,22 @@ class Catalogue:
         assigned_to: str,
     ) -> NameEvent:
         """Reserve an available name."""
-        current = self._current_name(name)
+        with immediate_transaction(self.connection):
+            current = self._current_name(name)
 
-        if not current.enabled or current.state != NameState.AVAILABLE:
-            raise InvalidNameTransitionError(f"Name [{name}] is not available.")
+            if not current.enabled or current.state != NameState.AVAILABLE:
+                raise InvalidNameTransitionError(
+                    f"Name [{name}] is not available.",
+                )
 
-        event = NameEvent(
-            name=name,
-            assigned_to=assigned_to,
-            event=NameEventType.RESERVED,
-            state=NameState.RESERVED,
-            occurred_at=utc_now(),
-        )
+            event = NameEvent(
+                name=name,
+                assigned_to=assigned_to,
+                event=NameEventType.RESERVED,
+                state=NameState.RESERVED,
+                occurred_at=utc_now(),
+            )
 
-        with self.connection:
             return self.events.append(event)
 
     def release_name(
@@ -312,19 +317,19 @@ class Catalogue:
         name: str,
     ) -> NameEvent:
         """Release an allocated or reserved name."""
-        current = self._current_name(name)
+        with immediate_transaction(self.connection):
+            current = self._current_name(name)
 
-        if current.state == NameState.AVAILABLE:
-            raise InvalidNameTransitionError(
-                f"Name [{name}] is already available."
+            if current.state == NameState.AVAILABLE:
+                raise InvalidNameTransitionError(
+                    f"Name [{name}] is already available."
+                )
+
+            event = NameEvent(
+                name=name,
+                event=NameEventType.RELEASED,
+                state=NameState.AVAILABLE,
+                occurred_at=utc_now(),
             )
 
-        event = NameEvent(
-            name=name,
-            event=NameEventType.RELEASED,
-            state=NameState.AVAILABLE,
-            occurred_at=utc_now(),
-        )
-
-        with self.connection:
             return self.events.append(event)
