@@ -12,7 +12,7 @@ from moniker.app import app
 from moniker.database import connect
 from moniker.migrate import migrate
 
-from tests.fixtures import seed_catalogue
+from tests.fixtures import seed_catalogue, catalogue_name_count
 
 
 @pytest.fixture
@@ -56,3 +56,8 @@ def api_client(
 
     with TestClient(app) as client:
         yield client
+
+@pytest.fixture
+def catalogue_item_count() -> int:
+    """Return the number of names in the catalogue fixture."""
+    return catalogue_name_count()

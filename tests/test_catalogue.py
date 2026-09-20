@@ -632,6 +632,38 @@ class TestCreateNameCatalogue:
         assert event_rows == []
         assert tag_rows == []
 
+    def test_catalogue_rolls_back_created_source(
+        self,
+        seeded_database: sqlite3.Connection,
+    ) -> None:
+        """R-BICEP: Boundary."""
+        catalogue = Catalogue(
+            seeded_database
+        )
+
+        source = Source(
+            title="Secret Garden",
+            description="Created as part of a failed name.",
+            type="growing-area",
+        )
+
+        with pytest.raises(
+            NameAlreadyExistsError
+        ):
+            catalogue.create_name(
+                Name(
+                    value="apple",
+                    sources=(source,),
+                )
+            )
+
+        persisted = catalogue.get_source(
+            "Secret Garden",
+            "growing-area",
+        )
+
+        assert persisted is None
+
 
 class TestNameHistoryCatalogue:
     """Test lifecycle history orchestration."""

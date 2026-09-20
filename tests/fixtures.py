@@ -254,3 +254,13 @@ def seed_catalogue(
 
     connection.commit()
 
+def catalogue_name_count() -> int:
+    """Return the number of names in the catalogue fixture."""
+    catalogue = _load_catalogue_fixture()
+
+    return len(
+        catalogue.get(
+            "names",
+            [],
+        )
+    )

@@ -10,7 +10,6 @@ from moniker.domain import Name, NameState, Source
 from moniker.stores import NameStore
 
 
-
 class ListNameFilters(TypedDict, total=False):
     """Typed dict for name filters."""
 
@@ -753,3 +752,22 @@ class TestNameStore:
                     type="growing-area",
                 ),
             )
+
+    def test_name_store_can_list_all_names(
+        self,
+        seeded_database: sqlite3.Connection,
+        catalogue_item_count: int,
+    ) -> None:
+        """R-BICEP: Boundary."""
+        store = NameStore(
+            seeded_database
+        )
+
+        names = store.list(enabled=None, state=None)
+        values = self.name_values(names)
+
+
+        assert len(values) == catalogue_item_count
+        assert "apple" in values
+        assert "lime" in values
+        assert "turnip" in values
