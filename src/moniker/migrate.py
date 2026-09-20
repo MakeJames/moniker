@@ -101,6 +101,9 @@ def apply_migration(
             connection.rollback()
 
         raise
+    finally:
+        connection.commit()
+        connection.execute("PRAGMA foreign_keys = ON")
 
     version = current_version(connection)
 

@@ -29,5 +29,3 @@ ON allocations(assigned_to)
 WHERE released_at IS NULL;
 
 PRAGMA user_version = 1;
-
-COMMIT;

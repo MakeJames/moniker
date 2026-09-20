@@ -190,6 +190,3 @@ RENAME TO names;
 
 PRAGMA user_version = 3;
 
-COMMIT;
-
-PRAGMA foreign_keys = ON;

@@ -19,5 +19,3 @@ BEGIN
 END;
 
 PRAGMA user_version = 4;
-
-COMMIT;

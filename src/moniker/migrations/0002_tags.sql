@@ -15,5 +15,3 @@ CREATE INDEX tags_by_tag
 ON tags(tag);
 
 PRAGMA user_version = 2;
-
-COMMIT;
