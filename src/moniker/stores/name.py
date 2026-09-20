@@ -312,7 +312,7 @@ class NameStore:
 
         if created_name is None:
             raise MonikerReadWriteError(
-                f"Created name [{Name.value}] could not be found.",
+                f"Created name [{name.value}] could not be found.",
             )
 
         return created_name
