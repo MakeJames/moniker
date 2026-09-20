@@ -21,11 +21,13 @@ def database(
 ) -> Iterator[sqlite3.Connection]:
     """Return a fresh migrated database."""
     path = tmp_path / "moniker.db"
+    connection = connect(path)
 
-    with connect(path) as connection:
+    try:
         migrate(connection)
-
         yield connection
+    finally:
+        connection.close()
 
 
 @pytest.fixture
