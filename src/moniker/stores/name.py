@@ -38,6 +38,7 @@ class NameStore:
     def list(
         self,
         *,
+        query: str | None = None,
         tags: tuple[str, ...] = (),
         source_title: str | None = None,
         source_type: str | None = None,
@@ -69,16 +70,23 @@ class NameStore:
                 The availability of the name.
 
         """
-        query, params = self._build_query(
+        sql, params = self._build_query(
+            query=query,
             tags=tags,
             source_title=source_title,
             source_type=source_type,
             enabled=enabled,
             state=state,
         )
-        query = query + "\norder by names.name"
-        results = self.connection.execute(query, params).fetchall()
-        return self._hydrate_names(results)
+
+        sql += "\norder by names.name"
+
+        rows = self.connection.execute(
+            sql,
+            params,
+        ).fetchall()
+
+        return self._hydrate_names(rows)
 
     def get(self, name: str) -> Name | None:
         """Fetch a catalogue item from its name.
@@ -118,33 +126,7 @@ class NameStore:
 
     def find(self, search_query: str) -> tuple[Name, ...]:
         """Find catalogue names matching a partial value."""
-        self._validate_query_value(search_query, "query")
-
-        _search_query = self._escape_like(search_query)
-
-        query = """
-            select
-                names.name,
-                names.description,
-                names.enabled,
-                current_event.state
-            from names
-            join name_events as current_event
-              on current_event.name = names.name
-             and current_event.occurred_at = (
-                    select max(history.occurred_at)
-                    from name_events as history
-                    where history.name = names.name
-                )
-            where names.name like ? escape '!' collate nocase
-            order by names.name
-        """
-
-        rows = self.connection.execute(
-            query, (f"%{_search_query}%",)
-        ).fetchall()
-
-        return self._hydrate_names(rows)
+        return self.list(query=search_query, enabled=None, state=None)
 
     def create(self, name: Name) -> Name:
         """Create a catalogue name.
@@ -369,6 +351,7 @@ class NameStore:
     def _build_filters(
         self,
         *,
+        query: str | None = None,
         name: str | None = None,
         tags: tuple[str, ...] = (),
         source_title: str | None = None,
@@ -377,6 +360,7 @@ class NameStore:
         state: NameState | None = None,
     ) -> tuple[str, tuple[str | int, ...]]:
         """Construct query filters."""
+        self._validate_query_value(query, "query")
         self._validate_query_value(name, "name")
         self._validate_query_value(source_title, "source_title")
         self._validate_query_value(source_type, "source_type")
@@ -388,6 +372,11 @@ class NameStore:
         source_filters: list[str] = []
         filters: list[str] = []
         params: list[str | int] = []
+
+        if query is not None:
+            search_query = self._escape_like(query)
+            filters.append("names.name like ? escape '!' collate nocase")
+            params.append(f"%{search_query}%")
 
         if name is not None:
             filters.append("names.name = ?")
@@ -452,6 +441,7 @@ class NameStore:
     def _build_query(
         self,
         *,
+        query: str | None = None,
         tags: tuple[str, ...] = (),
         source_title: str | None = None,
         source_type: str | None = None,
@@ -459,7 +449,7 @@ class NameStore:
         state: NameState | None = None,
     ) -> tuple[str, tuple[str | int, ...]]:
         """Build a query for filtering catalogue names."""
-        query = """
+        sql = """
             select
                 names.name,
                 names.description,
@@ -476,6 +466,7 @@ class NameStore:
         """
 
         filters, params = self._build_filters(
+            query=query,
             tags=tags,
             source_title=source_title,
             source_type=source_type,
@@ -483,7 +474,7 @@ class NameStore:
             state=state,
         )
 
-        return query + filters, params
+        return sql + filters, params
 
     def _hydrate_names(
         self,

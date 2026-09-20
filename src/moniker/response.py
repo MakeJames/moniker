@@ -64,6 +64,7 @@ class NameResource(Document):
 
     sources: tuple[Link, ...] = ()
     tags: tuple[str, ...] = ()
+    enabled: bool = True
     state: NameState = NameState.AVAILABLE
 
     @override
@@ -91,7 +92,8 @@ class SourceResource(Document):
         if not self.links:
             self.links = (
                 Link.self_link(
-                    f"/sources/{self.type}/{self.title}", title=self.title
+                    f"/sources/{self.type}/{self.title}",
+                    title=self.title,
                 ),
             )
 
@@ -151,19 +153,9 @@ class NameEventResource(Document):
     """The record of a name given to a specific device or application."""
 
     event: NameEventType
+    state: NameState
     assigned_to: str | None = None
     occurred_at: datetime
-
-    @override
-    def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each allocation."""
-        if not self.links:
-            self.links = (
-                Link.self_link(
-                    f"/names/{self.title}/history/{self.occurred_at}",
-                    title=self.title,
-                ),
-            )
 
 
 class NameEventCollection(Collection[NameEventResource]):
@@ -209,12 +201,3 @@ class Suggestion(Document):
     """The response constructor for a suggestion."""
 
     name: NameResource
-    query: str | None = None
-
-    @override
-    def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each name."""
-        if self.query:
-            self.links = (Link.self_link(f"/names/suggest?{self.query}"),)
-        else:
-            self.links = (Link.self_link("/names/suggest"),)

@@ -22,7 +22,12 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from moniker.catalogue import SourceAlreadyExistsError
+from moniker.catalogue import (
+    InvalidNameTransitionError,
+    NameAlreadyExistsError,
+    NameNotFoundError,
+    SourceAlreadyExistsError,
+)
 
 type ResponseDescriptions = dict[
     int | str,
@@ -50,6 +55,38 @@ SOURCE_CREATE_RESPONSES: ResponseDescriptions = {
     },
 }
 
+NAME_NOT_FOUND_RESPONSE: ResponseDescriptions = {
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorResponse,
+        "description": "The requested name does not exist.",
+    },
+}
+
+NAME_CREATE_RESPONSES: ResponseDescriptions = {
+    status.HTTP_409_CONFLICT: {
+        "model": ErrorResponse,
+        "description": "The requested name already exists or is reserved.",
+    },
+}
+
+NAME_TRANSITION_RESPONSES: ResponseDescriptions = {
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorResponse,
+        "description": "The requested name does not exist.",
+    },
+    status.HTTP_409_CONFLICT: {
+        "model": ErrorResponse,
+        "description": "The requested lifecycle transition is invalid.",
+    },
+}
+
+SUGGESTION_NOT_FOUND_RESPONSE: ResponseDescriptions = {
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorResponse,
+        "description": "No available name matches the supplied filters.",
+    },
+}
+
 
 def register_exception_handlers(app: FastAPI) -> None:
     """Register application exception handlers with FastAPI."""
@@ -60,6 +97,45 @@ def register_exception_handlers(app: FastAPI) -> None:
         error: SourceAlreadyExistsError,
     ) -> JSONResponse:
         """Return a conflict when a source already exists."""
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "detail": str(error),
+            },
+        )
+
+    @app.exception_handler(NameAlreadyExistsError)
+    async def name_already_exists(
+        request: Request,
+        error: NameAlreadyExistsError,
+    ) -> JSONResponse:
+        """Return a conflict when a name already exists."""
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "detail": str(error),
+            },
+        )
+
+    @app.exception_handler(NameNotFoundError)
+    async def name_not_found(
+        request: Request,
+        error: NameNotFoundError,
+    ) -> JSONResponse:
+        """Return not found for an unknown name."""
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "detail": str(error),
+            },
+        )
+
+    @app.exception_handler(InvalidNameTransitionError)
+    async def invalid_name_transition(
+        request: Request,
+        error: InvalidNameTransitionError,
+    ) -> JSONResponse:
+        """Return conflict for an invalid transition."""
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content={

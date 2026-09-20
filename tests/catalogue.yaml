@@ -85,7 +85,6 @@ names:
         assigned_to: device-03
         at: 2026-09-06T19:20:00Z
       - event: released
-        assigned_to: device-03
         at: 2026-09-06T20:20:00Z
 
   - value: pear
@@ -244,7 +243,6 @@ names:
         assigned_to: device-07
         at: 2026-09-06T20:00:00Z
       - event: released
-        assigned_to: device-07
         at: 2026-09-06T21:00:00Z
 
   - value: courgette

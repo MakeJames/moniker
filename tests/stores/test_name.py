@@ -12,6 +12,7 @@ from moniker.stores import NameStore
 class ListNameFilters(TypedDict, total=False):
     """Typed dict for name filters."""
 
+    query: str | None
     source_title: str | None
     source_type: str | None
     enabled: bool | None

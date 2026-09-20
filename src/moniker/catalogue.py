@@ -116,6 +116,7 @@ class Catalogue:
     def list_names(
         self,
         *,
+        query: str | None = None,
         tags: tuple[str, ...] = (),
         source_title: str | None = None,
         source_type: str | None = None,
@@ -124,6 +125,7 @@ class Catalogue:
     ) -> tuple[Name, ...]:
         """Fetch names matching catalogue filters."""
         return self.names.list(
+            query=query,
             tags=tags,
             source_title=source_title,
             source_type=source_type,
