@@ -1,6 +1,8 @@
 include deploy/defaults.mk
 -include deploy/local.mk
 
+UV ?= $(shell command -v uv 2>/dev/null)
+
 BUILD_DIR := build/deploy
 DIST_DIR := dist
 
@@ -12,6 +14,8 @@ NGINX_ENABLED ?= /etc/nginx/sites-enabled
 
 SUDO ?= sudo
 
+.PHONY: check-uv
+
 .PHONY: \
 	configure \
 	show-config \
@@ -21,6 +25,13 @@ SUDO ?= sudo
 	install-config \
 	migrate \
 	enable
+
+check-uv:
+	@if [ -z "$(UV)" ] || [ ! -x "$(UV)" ]; then \
+		echo "uv could not be found."; \
+		echo "Set UV=/path/to/uv or add uv to PATH."; \
+		exit 1; \
+	fi
 
 configure: \
 	$(BUILD_DIR)/moniker.env \
@@ -67,8 +78,12 @@ show-config:
 clean-config:
 	rm -rf $(BUILD_DIR)
 
-build:
-	uv build
+build: check-uv
+	mkdir -p $(DIST_DIR)
+	$(UV) build \
+		--wheel \
+		--clear \
+		--out-dir $(DIST_DIR)
 
 install: install-user build
 	$(SUDO) install -d \
