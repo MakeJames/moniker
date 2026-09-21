@@ -17,14 +17,16 @@ SUDO ?= sudo
 .PHONY: check-uv
 
 .PHONY: \
-	configure \
-	show-config \
-	clean-config \
 	build \
+	check-uv \
+	configure \
+	clean-config \
+	deploy \
+	enable \
+	show-config \
 	install \
 	install-config \
-	migrate \
-	enable
+	migrate
 
 check-uv:
 	@if [ -z "$(UV)" ] || [ ! -x "$(UV)" ]; then \
@@ -74,6 +76,8 @@ show-config:
 	@echo "port:        $(MONIKER_PORT)"
 	@echo "log level:   $(MONIKER_LOG_LEVEL)"
 	@echo "server name: $(MONIKER_SERVER_NAME)"
+	@echo "python:      $(MONIKER_PYTHON)"
+	@echo "uv:          $(UV)"
 
 clean-config:
 	rm -rf $(BUILD_DIR)
@@ -105,7 +109,7 @@ install: install-user build
 		--reinstall \
 		$(DIST_DIR)/*.whl
 
-install-config: configure
+install-config: configure install-user
 	$(SUDO) install -d \
 		-o root \
 		-g $(MONIKER_GROUP) \
@@ -134,21 +138,45 @@ install-config: configure
 		$(NGINX_AVAILABLE)/moniker
 
 install-user:
+	@if ! getent group $(MONIKER_GROUP) >/dev/null; then \
+		$(SUDO) groupadd \
+			--system \
+			$(MONIKER_GROUP); \
+	fi
+
 	@if ! id -u $(MONIKER_USER) >/dev/null 2>&1; then \
 		$(SUDO) useradd \
 			--system \
+			--gid $(MONIKER_GROUP) \
 			--home $(MONIKER_STATE) \
+			--no-create-home \
 			--shell /usr/sbin/nologin \
 			$(MONIKER_USER); \
 	fi
 
-migrate: install install-config
+migrate:
+	@test -x "$(VENV)/bin/moniker-migrate" || { \
+		echo "Moniker is not installed."; \
+		echo "Run 'make install' first."; \
+		exit 1; \
+	}
+
 	$(SUDO) -u $(MONIKER_USER) \
 		env \
 		MONIKER_DATABASE="$(MONIKER_DATABASE)" \
 		$(VENV)/bin/moniker-migrate
 
-enable: install install-config migrate
+enable:
+	@test -f "$(SYSTEMD_DIR)/moniker.service" || { \
+		echo "Moniker systemd configuration is not installed."; \
+		exit 1; \
+	}
+
+	@test -f "$(NGINX_AVAILABLE)/moniker" || { \
+		echo "Moniker nginx configuration is not installed."; \
+		exit 1; \
+	}
+
 	$(SUDO) systemctl daemon-reload
 
 	$(SUDO) ln -sfn \
@@ -160,6 +188,12 @@ enable: install install-config migrate
 	$(SUDO) systemctl enable --now moniker
 
 	$(SUDO) systemctl reload nginx
+
+deploy:
+	$(MAKE) install
+	$(MAKE) install-config
+	$(MAKE) migrate
+	$(MAKE) enable
 
 upgrade:
 	$(MAKE) install
