@@ -146,17 +146,10 @@ class Catalogue:
         name: Name,
     ) -> Name:
         """Create a complete catalogue name."""
-        for source in name.sources:
-            existing = self.sources.get(
-                source.title,
-                source.type,
-            )
+        with self.connection:
+            self._ensure_sources(name.sources)
 
-            if existing is None:
-                self.sources.create(source)
-
-        try:
-            with self.connection:
+            try:
                 self.names.create(name)
 
                 self.events.append(
@@ -176,23 +169,30 @@ class Catalogue:
                     )
 
                 if name.tags:
-                    created = self.names.add_tags(
-                        created,
-                        name.tags,
-                    )
+                    created = self.names.add_tags(created, name.tags)
 
                 for source in name.sources:
-                    created = self.names.add_source(
-                        created,
-                        source,
-                    )
+                    created = self.names.add_source(created, source)
 
                 return created
 
-        except IntegrityError as error:
-            raise NameAlreadyExistsError(
-                f"Name already exists: {name.value}"
-            ) from error
+            except IntegrityError as error:
+                raise NameAlreadyExistsError(
+                    f"Name already exists: {name.value}"
+                ) from error
+
+    def _ensure_sources(self, sources: tuple[Source, ...]) -> None:
+        for source in sources:
+            try:
+                existing = self.sources.get(source.title, source.type)
+
+                if existing is None:
+                    self.sources.create(source)
+
+            except IntegrityError as error:
+                raise SourceAlreadyExistsError(
+                    f"Name already exists: {source.title}, {source.type}"
+                ) from error
 
     def find_names(
         self,
