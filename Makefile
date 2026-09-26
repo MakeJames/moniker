@@ -8,9 +8,9 @@ UV ?= $(shell command -v uv 2>/dev/null)
 BUILD_DIR := build/deploy
 DIST_DIR := dist
 
-VENV := $(MONIKER_HOME)/.venv
 RELEASES_DIR := $(MONIKER_HOME)/releases
 RELEASE_DIR := $(RELEASES_DIR)/$(PROJECT_VERSION)
+VENV := $(RELEASE_DIR)/.venv
 CURRENT := $(MONIKER_HOME)/current
 
 BACKUP_DIR := $(MONIKER_STATE)/backups
@@ -71,16 +71,16 @@ check-uv:
 	fi
 
 version: check-uv
-	@uv version --short
+	$(UV) version --short
 
 bump-major: check-uv
-	uv version --bump major --no-sync
+	$(UV) version --bump major --no-sync
 
 bump-minor: check-uv
-	uv version --bump minor --no-sync
+	$(UV) version --bump minor --no-sync
 
 bump-patch: check-uv
-	uv version --bump patch --no-sync
+	$(UV) version --bump patch --no-sync
 
 configure: \
 	$(BUILD_DIR)/moniker.env \
@@ -103,6 +103,7 @@ $(BUILD_DIR)/moniker.service: \
 		-e 's|@HOME@|$(MONIKER_HOME)|g' \
 		-e 's|@STATE@|$(MONIKER_STATE)|g' \
 		-e 's|@CONFIG@|$(MONIKER_CONFIG)|g' \
+		-e 's|@CURRENT@|$(CURRENT)|g' \
 		$< > $@
 
 $(BUILD_DIR)/moniker.nginx: \
@@ -142,9 +143,15 @@ backup:
 		-g $(MONIKER_GROUP) \
 		$(BACKUP_DIR)
 
-	$(SUDO) -u $(MONIKER_USER) \
-		sqlite3 $(MONIKER_DATABASE) \
-		".backup '$(BACKUP_DIR)/moniker-pre-$(VERSION).db'"
+	@if [ -f "$(MONIKER_DATABASE)" ]; then \
+		$(SUDO) -u $(MONIKER_USER) \
+			env \
+			MONIKER_DATABASE="$(MONIKER_DATABASE)" \
+			$(RELEASE_DIR)/.venv/bin/moniker-backup \
+			"$(BACKUP_DIR)/moniker-pre-$(PROJECT_VERSION).db"; \
+	else \
+		echo "No existing database to back up."; \
+	fi
 
 install: install-user build
 	$(SUDO) install -d \
@@ -157,11 +164,11 @@ install: install-user build
 		-g $(MONIKER_GROUP) \
 		$(MONIKER_STATE)
 
-	$(SUDO) uv venv \
+	$(SUDO) $(UV) venv \
 		--python python3 \
 		$(RELEASE_DIR)/.venv
 
-	$(SUDO) uv pip install \
+	$(SUDO) $(UV) pip install \
 		--python $(RELEASE_DIR)/.venv \
 		$(DIST_DIR)/*.whl
 
@@ -223,11 +230,16 @@ migrate: backup
 		$(RELEASE_DIR)/.venv/bin/moniker-migrate
 
 activate:
+	@test -d "$(RELEASE_DIR)" || \
+		(echo "Release $(PROJECT_VERSION) is not installed"; exit 1)
+
 	$(SUDO) ln -sfn \
 		$(RELEASE_DIR) \
 		$(CURRENT)
 
-	$(SUDO) systemctl restart moniker
+	@if $(SUDO) systemctl is-active --quiet moniker; then \
+		$(SUDO) systemctl restart moniker; \
+	fi
 
 enable:
 	@test -f "$(SYSTEMD_DIR)/moniker.service" || { \
@@ -256,13 +268,13 @@ deploy:
 	$(MAKE) install
 	$(MAKE) install-config
 	$(MAKE) migrate
+	$(MAKE) activate
 	$(MAKE) enable
 
 upgrade:
 	$(MAKE) install
 	$(MAKE) migrate
 	$(MAKE) activate
-	$(SUDO) systemctl restart moniker
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

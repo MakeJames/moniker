@@ -11,7 +11,7 @@ Group=@GROUP@
 WorkingDirectory=@STATE@
 EnvironmentFile=@CONFIG@/moniker.env
 
-ExecStart=@HOME@/.venv/bin/uvicorn \
+ExecStart=@CURRENT@/.venv/bin/uvicorn \
     moniker.app:app \
     --host ${MONIKER_HOST} \
     --port ${MONIKER_PORT} \
