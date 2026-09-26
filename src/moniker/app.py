@@ -1,6 +1,7 @@
 """Routes and endpoints for the api."""
 
 from typing import Annotated
+from urllib.parse import quote
 
 from fastapi import FastAPI, HTTPException, Query, Response, status
 
@@ -155,6 +156,35 @@ def get_source(
         )
 
     return source_resource(source)
+
+
+@app.get("/sources/{source_type}")
+def list_sources_by_type(
+    source_type: str,
+    catalogue: CatalogueDependency,
+    title: SourceFilter = None,
+) -> SourceCollection:
+    """List sources matching the supplied filters."""
+    sources = catalogue.list_sources(
+        title=title,
+        source_type=source_type,
+    )
+
+    return SourceCollection(
+        title=f"{source_type} Sources",
+        description=f"{source_type} sources referenced in the catalogue.",
+        count=len(sources),
+        links=(
+            Link.self_link(
+                f"/sources/{quote(source_type, safe='')}",
+                title=f"{source_type}",
+            ),
+        ),
+        items=tuple(
+            Link.self_link(source_href(source), title=source.title)
+            for source in sources
+        ),
+    )
 
 
 @app.get("/names")
