@@ -38,6 +38,7 @@ SUDO ?= sudo
 	rollback \
 	activate \
 	upgrade \
+	uninstall \
 	restore
 
 .PHONY: \
@@ -305,3 +306,23 @@ restore:
 		cp "$(BACKUP)" "$(MONIKER_DATABASE)"
 
 	$(SUDO) systemctl start moniker
+
+uninstall:
+	@echo "Disabling Moniker..."
+
+	@if $(SUDO) systemctl list-unit-files \
+			moniker.service >/dev/null 2>&1; then \
+		$(SUDO) systemctl disable --now moniker; \
+	fi
+
+	@if [ -L "$(NGINX_ENABLED)/moniker" ]; then \
+		$(SUDO) rm "$(NGINX_ENABLED)/moniker"; \
+	fi
+
+	$(SUDO) nginx -t
+
+	$(SUDO) systemctl reload nginx
+
+	@echo
+	@echo "Moniker is disabled."
+	@echo "Application releases, configuration and data have been preserved."
