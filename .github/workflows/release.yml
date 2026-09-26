@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+
+      - name: Verify version
+        run: |
+          project_version="$(uv version --short)"
+
+          if [ "$GITHUB_REF_NAME" != "$project_version" ]; then
+              echo "Tag:     $GITHUB_REF_NAME"
+              echo "Project: $project_version"
+              exit 1
+          fi
+
+      - name: Verify lockfile
+        run: uv lock --check
+
+      - name: Build wheel
+        run: make build
+
+      - name: Prepare deployment test
+        run: |
+          echo "MONIKER_USER=$(id -un)" >> "$GITHUB_ENV"
+          echo "MONIKER_GROUP=$(id -gn)" >> "$GITHUB_ENV"
+          echo "MONIKER_HOME=$RUNNER_TEMP/moniker" >> "$GITHUB_ENV"
+          echo "MONIKER_STATE=$RUNNER_TEMP/state" >> "$GITHUB_ENV"
+          echo "MONIKER_CONFIG=$RUNNER_TEMP/config" >> "$GITHUB_ENV"
+          echo "SYSTEMD_DIR=$RUNNER_TEMP/systemd" >> "$GITHUB_ENV"
+          echo "NGINX_AVAILABLE=$RUNNER_TEMP/nginx/available" \
+              >> "$GITHUB_ENV"
+          echo "NGINX_ENABLED=$RUNNER_TEMP/nginx/enabled" \
+              >> "$GITHUB_ENV"
+
+          mkdir -p \
+              "$RUNNER_TEMP/systemd" \
+              "$RUNNER_TEMP/nginx/available" \
+              "$RUNNER_TEMP/nginx/enabled"
+
+      - name: Test install
+        run: make install
+
+      - name: Test configuration
+        run: make install-config
+
+      - name: Test migration
+        run: make migrate
+
+      - name: Activate release
+        run: make activate
+
+      - name: Verify installation
+        run: |
+          test -x \
+              "$MONIKER_HOME/current/.venv/bin/moniker-migrate"
+
+          test -f \
+              "$MONIKER_STATE/moniker.db"
+
+      - name: Smoke test
+        run: |
+          "$MONIKER_HOME/current/.venv/bin/uvicorn" \
+              moniker.app:app \
+              --host 127.0.0.1 \
+              --port 8042 &
+
+          server_pid=$!
+
+          trap 'kill "$server_pid"' EXIT
+
+          for attempt in {1..10}; do
+              if curl --fail --silent \
+                  http://127.0.0.1:8042/health; then
+                  exit 0
+              fi
+
+              sleep 1
+          done
+
+          exit 1
+
+      - name: Store wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: moniker-${{ github.ref_name }}
+          path: dist/*.whl,t
