@@ -326,3 +326,11 @@ uninstall:
 	@echo
 	@echo "Moniker is disabled."
 	@echo "Application releases, configuration and data have been preserved."
+
+.PHONY: check
+
+check:
+	$(UV) run ruff format --check .
+	$(UV) run ruff check .
+	$(UV) run mypy src/
+	$(UV) run pytest
