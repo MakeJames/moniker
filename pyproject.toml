@@ -1,6 +1,6 @@
 [project]
 name = "moniker"
-version = "0.1.2"
+version = "0.1.3"
 description = "A simple API to help name things."
 readme = "README.md"
 authors = [
