@@ -1,12 +1,19 @@
 include deploy/defaults.mk
 -include deploy/local.mk
 
+PROJECT_VERSION := $(shell uv version --short)
+
 UV ?= $(shell command -v uv 2>/dev/null)
 
 BUILD_DIR := build/deploy
 DIST_DIR := dist
 
 VENV := $(MONIKER_HOME)/.venv
+RELEASES_DIR := $(MONIKER_HOME)/releases
+RELEASE_DIR := $(RELEASES_DIR)/$(PROJECT_VERSION)
+CURRENT := $(MONIKER_HOME)/current
+
+BACKUP_DIR := $(MONIKER_STATE)/backups
 
 SYSTEMD_DIR ?= /etc/systemd/system
 NGINX_AVAILABLE ?= /etc/nginx/sites-available
@@ -18,7 +25,7 @@ SUDO ?= sudo
 
 .PHONY: \
 	build \
-	check-uv \
+	backup \
 	configure \
 	clean-config \
 	deploy \
@@ -26,7 +33,35 @@ SUDO ?= sudo
 	show-config \
 	install \
 	install-config \
-	migrate
+	migrate \
+	list-versions \
+	rollback \
+	activate \
+	upgrade \
+	restore
+
+.PHONY: \
+	version \
+	bump-major \
+	bump-minor \
+	bump-patch
+
+list-versions:
+	@current=""; \
+	if [ -L "$(CURRENT)" ]; then \
+		current=$$(basename "$$(readlink -f "$(CURRENT)")"); \
+	fi; \
+	for release in $$(find "$(RELEASES_DIR)" \
+			-mindepth 1 \
+			-maxdepth 1 \
+			-type d \
+			-printf '%f\n' 2>/dev/null | sort -V); do \
+		if [ "$$release" = "$$current" ]; then \
+			printf '%s  (current)\n' "$$release"; \
+		else \
+			printf '%s\n' "$$release"; \
+		fi; \
+	done
 
 check-uv:
 	@if [ -z "$(UV)" ] || [ ! -x "$(UV)" ]; then \
@@ -34,6 +69,18 @@ check-uv:
 		echo "Set UV=/path/to/uv or add uv to PATH."; \
 		exit 1; \
 	fi
+
+version: check-uv
+	@uv version --short
+
+bump-major: check-uv
+	uv version --bump major --no-sync
+
+bump-minor: check-uv
+	uv version --bump minor --no-sync
+
+bump-patch: check-uv
+	uv version --bump patch --no-sync
 
 configure: \
 	$(BUILD_DIR)/moniker.env \
@@ -89,11 +136,21 @@ build: check-uv
 		--clear \
 		--out-dir $(DIST_DIR)
 
+backup:
+	$(SUDO) install -d \
+		-o $(MONIKER_USER) \
+		-g $(MONIKER_GROUP) \
+		$(BACKUP_DIR)
+
+	$(SUDO) -u $(MONIKER_USER) \
+		sqlite3 $(MONIKER_DATABASE) \
+		".backup '$(BACKUP_DIR)/moniker-pre-$(VERSION).db'"
+
 install: install-user build
 	$(SUDO) install -d \
 		-o $(MONIKER_USER) \
 		-g $(MONIKER_GROUP) \
-		$(MONIKER_HOME)
+		$(RELEASE_DIR)
 
 	$(SUDO) install -d \
 		-o $(MONIKER_USER) \
@@ -102,11 +159,10 @@ install: install-user build
 
 	$(SUDO) uv venv \
 		--python python3 \
-		$(VENV)
+		$(RELEASE_DIR)/.venv
 
 	$(SUDO) uv pip install \
-		--python $(VENV) \
-		--reinstall \
+		--python $(RELEASE_DIR)/.venv \
 		$(DIST_DIR)/*.whl
 
 install-config: configure install-user
@@ -154,7 +210,7 @@ install-user:
 			$(MONIKER_USER); \
 	fi
 
-migrate:
+migrate: backup
 	@test -x "$(VENV)/bin/moniker-migrate" || { \
 		echo "Moniker is not installed."; \
 		echo "Run 'make install' first."; \
@@ -164,7 +220,14 @@ migrate:
 	$(SUDO) -u $(MONIKER_USER) \
 		env \
 		MONIKER_DATABASE="$(MONIKER_DATABASE)" \
-		$(VENV)/bin/moniker-migrate
+		$(RELEASE_DIR)/.venv/bin/moniker-migrate
+
+activate:
+	$(SUDO) ln -sfn \
+		$(RELEASE_DIR) \
+		$(CURRENT)
+
+	$(SUDO) systemctl restart moniker
 
 enable:
 	@test -f "$(SYSTEMD_DIR)/moniker.service" || { \
@@ -198,7 +261,35 @@ deploy:
 upgrade:
 	$(MAKE) install
 	$(MAKE) migrate
+	$(MAKE) activate
 	$(SUDO) systemctl restart moniker
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+
+rollback:
+	@test -n "$(RELEASE)" || \
+		(echo "RELEASE is required"; exit 1)
+
+	@test -d "$(RELEASES_DIR)/$(RELEASE)" || \
+		(echo "Release $(RELEASE) is not installed"; exit 1)
+
+	$(SUDO) ln -sfn \
+		$(RELEASES_DIR)/$(RELEASE) \
+		$(CURRENT)
+
+	$(SUDO) systemctl restart moniker
+
+restore:
+	@test -n "$(BACKUP)" || \
+		(echo "BACKUP is required"; exit 1)
+
+	@test -f "$(BACKUP)" || \
+		(echo "Backup does not exist: $(BACKUP)"; exit 1)
+
+	$(SUDO) systemctl stop moniker
+
+	$(SUDO) -u $(MONIKER_USER) \
+		cp "$(BACKUP)" "$(MONIKER_DATABASE)"
+
+	$(SUDO) systemctl start moniker

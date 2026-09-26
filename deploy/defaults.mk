@@ -1,7 +1,7 @@
 MONIKER_USER ?= moniker
 MONIKER_GROUP ?= moniker
 
-MONIKER_HOME ?= /opt/moniker
+MONIKER_HOME ?= /opt/moniker/current
 MONIKER_STATE ?= /var/lib/moniker
 MONIKER_CONFIG ?= /etc/moniker
 
