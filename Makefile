@@ -1,5 +1,5 @@
-include deploy/defaults.mk
 -include deploy/local.mk
+include deploy/defaults.mk
 
 PROJECT_VERSION := $(shell uv version --short)
 
