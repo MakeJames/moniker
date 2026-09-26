@@ -23,7 +23,74 @@ Moniker us currently under active development.
 
 ## Usage
 
+The API is designed to be self discoverable and self linking.
+Fastapi serves OpenAPI docs on `/docs`.
 
+The main resources can be found at 
+
+```
+/names
+/sources
+/suggestion
+```
+
+### Browse names
+
+List the names in the catalogue: `curl moniker.local/names`.
+Filer names by tag, source or availability or search in the catalogue:
+`curl moniker.local/names?tag=fruit&tag=orchard&state=available`
+
+### Ask for a suggestion
+
+Request an available name with `curl moniker.local/suggestion`.
+Suggestions can be narrowed using tags or sources in the query parameters,
+`curl moniker.local/suggestion?source_title=Pond&source_type=Garden`
+
+### Adding names
+
+Create a new entry with:
+
+```
+curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{
+      "value": "dragnfruit",
+      "description": "A dramatic fruit.",
+      "tags": ["fruit", "tropical"],
+      "source": {
+        "title": "Fruit Aisle",
+        "type": "Supermarket"
+      }
+    }' \
+    "moniker.local/names"
+```
+
+#### Add multiple names
+
+At this point there is no separate 'bulk-import API'.
+Collections of names can be imported on individual api requests
+using other shell utilities such as:
+
+```
+tail -n +2 names.csv |
+while IFS=, read -r value description tags; do
+    jq -n \
+        --arg value "$value" \
+        --arg description "$description" \
+        --arg tags "$tags" \
+        '{
+            value: $value,
+            description: $description,
+            tags: ($tags | split(";"))
+        }' |
+    curl \
+        -X POST \
+        -H "Content-Type: application/json" \
+        -d @- \
+        "moniker.local/names"
+done
+```
 
 ## Installation
 
