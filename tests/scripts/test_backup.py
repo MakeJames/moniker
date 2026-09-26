@@ -3,7 +3,7 @@
 import sqlite3
 from pathlib import Path
 
-from moniker.backup import backup_database
+from moniker.scripts.backup import backup_database
 
 
 def test_backup_database(tmp_path: Path) -> None:

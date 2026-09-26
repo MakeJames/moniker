@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from moniker.migrate import (
+from moniker.scripts.migrate import (
     Migration,
     UnrecognisedMigrationFileError,
     apply_migration,

@@ -10,7 +10,7 @@ from freezegun import freeze_time
 
 from moniker.app import app
 from moniker.database import connect
-from moniker.migrate import migrate
+from moniker.scripts.migrate import migrate
 from tests.fixtures import catalogue_name_count, seed_catalogue
 
 

@@ -1,6 +1,6 @@
 [project]
 name = "moniker"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple API to help name things."
 readme = "README.md"
 authors = [
@@ -14,8 +14,8 @@ dependencies = [
 ]
 
 [project.scripts]
-moniker-migrate = "moniker.migrate:main"
-moniker-backup = "moniker.backup:main"
+moniker-migrate = "moniker.scripts.migrate:main"
+moniker-backup = "moniker.scripts.backup:main"
 
 [project.dev-scripts]
 ruff = {cmd = "ruff check ./src/ ./tests/"}
