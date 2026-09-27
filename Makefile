@@ -166,7 +166,7 @@ install: install-user build
 		$(MONIKER_STATE)
 
 	$(SUDO) $(UV) venv \
-		--python python3 \
+		--python $(MONIKER_PYTHON) \
 		$(RELEASE_DIR)/.venv
 
 	$(SUDO) $(UV) pip install \
