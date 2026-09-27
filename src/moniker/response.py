@@ -11,15 +11,12 @@ T = TypeVar("T")
 
 
 class Link(BaseModel):
-    """Base model for links within the json response.
+    """A link to a related API resource."""
 
-    Links maintain the self discoverability of the api.
-    """
-
+    title: str | None = None
     href: str
     rel: str
     type: str = "application/json"
-    title: str | None = None
 
     @classmethod
     def self_link(
@@ -29,66 +26,67 @@ class Link(BaseModel):
         type: str = "application/json",
         title: str | None = None,
     ) -> Self:
-        """Build a reference to the current object."""
-        return cls(href=href, rel="self", type=type, title=title)
+        """Build a reference to the current resource."""
+        return cls(title=title, href=href, rel="self", type=type)
 
 
-class LinkedResource(BaseModel):
-    """A container for links related to a resource."""
-
-    links: tuple[Link, ...] = ()
-
-
-class Document(LinkedResource):
-    """A page within the api."""
+class Document(BaseModel):
+    """A document within the API."""
 
     title: str
     description: str | None = None
 
 
 class Collection(Document, Generic[T]):
-    """A collection of items within the api."""
+    """A collection of API resources."""
 
     count: int = Field(ge=0)
     items: tuple[T, ...] = ()
+    links: tuple[Link, ...] = ()
 
 
 class ApplicationRoot(Document):
-    """The root document of the applicaiton."""
+    """The root document of the application."""
 
     version: str
+    links: tuple[Link, ...] = ()
 
 
 class NameResource(Document):
-    """A name item from the database."""
+    """A name item from the catalogue."""
 
     sources: tuple[Link, ...] = ()
     tags: tuple[str, ...] = ()
     enabled: bool = True
     state: NameState = NameState.AVAILABLE
+    links: tuple[Link, ...] = ()
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each name."""
+        """Add links related to the name."""
         if not self.links:
             self.links = (
-                Link.self_link(f"/names/{self.title}", title=self.title),
+                Link.self_link(
+                    f"/names/{self.title}",
+                    title=self.title,
+                ),
                 Link(
-                    href=f"/names/{self.title}/history",
                     title=f"{self.title} history",
+                    href=f"/names/{self.title}/history",
                     rel="history",
                 ),
             )
 
 
 class SourceResource(Document):
-    """The source material for a catelogue item."""
+    """Source material for a catalogue item."""
 
     type: str
+    links: tuple[Link, ...] = ()
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each name."""
+        """Add links related to the source."""
         if not self.links:
             self.links = (
                 Link.self_link(
@@ -99,71 +97,85 @@ class SourceResource(Document):
 
 
 class SourceCollection(Document):
-    """A Collection of Sources."""
+    """A collection of sources."""
 
     count: int = Field(ge=0)
     items: tuple[Link, ...] = ()
+    links: tuple[Link, ...] = ()
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each name."""
+        """Add links related to the source collection."""
         if not self.links:
-            self.links = (Link.self_link("/sources", title=self.title),)
+            self.links = (
+                Link.self_link(
+                    "/sources",
+                    title=self.title,
+                ),
+            )
 
 
 class SourceTypeCollection(Collection[SourceResource]):
-    """A collection of sources by type."""
+    """A collection of sources of a particular type."""
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each name."""
+        """Add links related to the source type."""
         if not self.links:
             self.links = (
-                Link.self_link(f"/sources/{self.title}", title=self.title),
+                Link.self_link(
+                    f"/sources/{self.title}",
+                    title=self.title,
+                ),
             )
 
 
 class NameCollection(Collection[NameResource]):
-    """A collection of Names."""
+    """A collection of names."""
 
     pass
 
 
 class TagResource(Document):
-    """A Tag and meta data abaout the tag."""
+    """A tag and metadata about its catalogue usage."""
 
     count: int = Field(ge=0)
+    links: tuple[Link, ...] = ()
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each tag."""
+        """Add links related to the tag."""
         if not self.links:
             self.links = (
-                Link.self_link(f"/tags/{self.title}", title=self.title),
+                Link.self_link(
+                    f"/tags/{self.title}",
+                    title=self.title,
+                ),
             )
 
 
 class TagCollection(Collection[TagResource]):
-    """A collection of Tags."""
+    """A collection of tags."""
 
     pass
 
 
 class NameEventResource(Document):
-    """The record of a name given to a specific device or application."""
+    """A lifecycle event associated with a name."""
 
     event: NameEventType
     state: NameState
     assigned_to: str | None = None
     occurred_at: datetime
+    links: tuple[Link, ...] = ()
 
 
 class NameEventCollection(Collection[NameEventResource]):
-    """A collection of records associated with a device."""
+    """A collection of lifecycle events associated with a name."""
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each allocation."""
+        """Add links related to the name history."""
         if not self.links:
             self.links = (
                 Link.self_link(
@@ -174,14 +186,15 @@ class NameEventCollection(Collection[NameEventResource]):
 
 
 class AllocationResource(Document):
-    """The current assignment of a name given to a device or application."""
+    """The current allocation of a name."""
 
     assigned_to: str
     assigned_at: datetime
+    links: tuple[Link, ...] = ()
 
     @override
     def model_post_init(self, __context: Any) -> None:
-        """Dynamically add the links to each allocation."""
+        """Add links related to the allocation."""
         if not self.links:
             self.links = (
                 Link.self_link(
@@ -192,12 +205,13 @@ class AllocationResource(Document):
 
 
 class AllocationCollection(Collection[AllocationResource]):
-    """A collection of Allocations."""
+    """A collection of allocations."""
 
     pass
 
 
 class Suggestion(Document):
-    """The response constructor for a suggestion."""
+    """A suggested available name."""
 
     name: NameResource
+    links: tuple[Link, ...] = ()
